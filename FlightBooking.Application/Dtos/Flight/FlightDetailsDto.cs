@@ -1,6 +1,6 @@
-using FlightBooking.Appication.Dtos.Seat;
+using FlightBooking.Application.Dtos.Seat;
 
-namespace FlightBooking.Appication.Dtos.Flight;
+namespace FlightBooking.Application.Dtos.Flight;
 
 public class FlightDetailsDto : FlightDto
 {

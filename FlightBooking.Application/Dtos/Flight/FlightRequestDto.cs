@@ -1,9 +1,7 @@
 namespace FlightBooking.Application.Dtos.Flight;
 
-public class FlightDto
+public class FlightRequestDto
 {
-    public int Id { get; set; }
-    
     public string From { get; set; } = string.Empty;
     public string To { get; set; } = string.Empty;
     public string FlightNumber { get; set; } = string.Empty;

@@ -25,4 +25,22 @@ public class FlightService
             .ThenInclude(s => s.BookingSeats)
             .FirstOrDefaultAsync(f => f.Id == id);
     }
+
+    public async Task AddFlightAsync(Flight flight)
+    {
+        _dbContext.Flights.Add(flight);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task UpdateFlightAsync(Flight flight)
+    {
+        _dbContext.Flights.Update(flight);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task DeleteFlightAsync(Flight flight)
+    {
+        _dbContext.Flights.Remove(flight);
+        await _dbContext.SaveChangesAsync();
+    }
 }

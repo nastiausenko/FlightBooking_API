@@ -1,8 +1,8 @@
-using FlightBooking.Appication.Dtos.Flight;
-using FlightBooking.Appication.Dtos.Seat;
+using FlightBooking.Application.Dtos.Flight;
+using FlightBooking.Application.Dtos.Seat;
 using FlightBooking.Domain;
 
-namespace FlightBooking.Appication.Mappers;
+namespace FlightBooking.Application.Mappers;
 
 public static class FlightMapper
 {
@@ -41,6 +41,18 @@ public static class FlightMapper
                     IsCancelled = bookingSeat?.IsCancelled
                 };
             }).ToList()
+        };
+    }
+
+    public static Flight ToFlight(FlightRequestDto requestDto)
+    {
+        return new Flight
+        {
+            From =  requestDto.From,
+            To =  requestDto.To,
+            FlightNumber = requestDto.FlightNumber,
+            Departure = requestDto.Departure,
+            Arrival = requestDto.Arrival
         };
     }
 }

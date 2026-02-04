@@ -1,6 +1,6 @@
 using FlightBooking.Domain;
 
-namespace FlightBooking.Appication.Dtos.Seat;
+namespace FlightBooking.Application.Dtos.Seat;
 
 public class SeatDto
 {

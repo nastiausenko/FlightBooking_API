@@ -1,6 +1,6 @@
 using FlightBooking.Application.Dtos.Flight;
+using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Mappers;
-using FlightBooking.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightBooking.Controllers;
@@ -9,9 +9,9 @@ namespace FlightBooking.Controllers;
 [Route("api/[controller]")]
 public class FlightController : ControllerBase
 {
-    private readonly FlightService _flightService;
+    private readonly IFlightService _flightService;
     
-    public FlightController(FlightService flightService)
+    public FlightController(IFlightService flightService)
     {
         _flightService = flightService;
     }
@@ -39,7 +39,7 @@ public class FlightController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<FlightDto>> CreateFlight([FromBody] FlightRequestDto requestDto)
+    public async Task<ActionResult<FlightDto>> CreateFlight([FromBody] CreateFlightRequestDto requestDto)
     {
         var flight = FlightMapper.ToFlight(requestDto);
         await _flightService.AddFlightAsync(flight);
@@ -49,33 +49,21 @@ public class FlightController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateFlight(int id, [FromBody] UpdateFlightRequest requestDto)
+    public async Task<IActionResult> UpdateFlight(int id, [FromBody] UpdateFlightRequestDto updateDto)
     {
-        var flight = await _flightService.GetFlightByIdAsync(id);
-        if (flight == null)
+        var updatedFlight = await _flightService.UpdateFlightAsync(id, updateDto);
+        if (updatedFlight == null)
         {
             return NotFound();
         }
         
-        flight.From = requestDto.From;
-        flight.To = requestDto.To;
-        flight.Arrival = requestDto.Arrival;
-        flight.Departure = requestDto.Departure;
-        flight.FlightNumber = requestDto.FlightNumber;
-        
-        await _flightService.UpdateFlightAsync(flight);
-        return Ok(FlightMapper.ToFlightDto(flight));
+        return Ok(FlightMapper.ToFlightDto(updatedFlight));
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteFlight(int id)
     {
-        var flight = await _flightService.GetFlightByIdAsync(id);
-        if (flight != null)
-        {
-            await _flightService.DeleteFlightAsync(flight);
-        }
-        
+        await _flightService.DeleteFlightAsync(id);
         return NoContent();
     }
 }

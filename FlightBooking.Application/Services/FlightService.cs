@@ -1,10 +1,12 @@
+using FlightBooking.Application.Dtos.Flight;
+using FlightBooking.Application.Interfaces;
 using FlightBooking.Domain;
 using FlightBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlightBooking.Application.Services;
 
-public class FlightService
+public class FlightService : IFlightService
 {
     private readonly FlightBookingDbContext _dbContext;
     
@@ -26,20 +28,37 @@ public class FlightService
             .FirstOrDefaultAsync(f => f.Id == id);
     }
 
-    public async Task AddFlightAsync(Flight flight)
+    public async Task<Flight> AddFlightAsync(Flight flight)
     {
         _dbContext.Flights.Add(flight);
         await _dbContext.SaveChangesAsync();
+        return flight;
     }
 
-    public async Task UpdateFlightAsync(Flight flight)
+    public async Task<Flight?> UpdateFlightAsync(int id, UpdateFlightRequestDto dto)
     {
-        _dbContext.Flights.Update(flight);
+        var flight = await _dbContext.Flights.FirstOrDefaultAsync(f => f.Id == id);
+        if (flight == null)
+        {
+            return null;
+        }
+        
+        flight.From = dto.From;
+        flight.To = dto.To;
+        flight.Departure = dto.Departure;
+        flight.Arrival = dto.Arrival;
+        flight.FlightNumber = dto.FlightNumber;
+
         await _dbContext.SaveChangesAsync();
+        return flight;
     }
 
-    public async Task DeleteFlightAsync(Flight flight)
+    public async Task DeleteFlightAsync(int id)
     {
+        var flight = await _dbContext.Flights.FirstOrDefaultAsync(f => f.Id == id);
+        if (flight == null)
+            return;
+
         _dbContext.Flights.Remove(flight);
         await _dbContext.SaveChangesAsync();
     }

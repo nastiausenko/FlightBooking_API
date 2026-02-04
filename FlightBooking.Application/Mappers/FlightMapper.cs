@@ -40,7 +40,7 @@ public static class FlightMapper
         };
     }
 
-    public static Flight ToFlight(FlightRequestDto requestDto)
+    public static Flight ToFlight(CreateFlightRequestDto requestDto)
     {
         var flight = new Flight
         {

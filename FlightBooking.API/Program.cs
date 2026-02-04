@@ -1,3 +1,4 @@
+using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Services;
 using FlightBooking.Infrastructure;
 using FlightBooking.Infrastructure.Data;
@@ -11,7 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<FlightService>();
+builder.Services.AddScoped<IFlightService, FlightService>();
 
 builder.Services.AddDbContext<FlightBookingDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

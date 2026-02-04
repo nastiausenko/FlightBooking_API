@@ -29,30 +29,38 @@ public static class FlightMapper
             FlightNumber = flight.FlightNumber,
             Departure = flight.Departure,
             Arrival = flight.Arrival,
-            Seats = flight.Seats.Select(s =>
+            Seats = flight.Seats.Select(s => new SeatDto
             {
-                var bookingSeat = s.BookingSeats.FirstOrDefault(bs => !bs.IsCancelled);
-                return new SeatDto
-                {
-                    Id = s.Id,
-                    SeatNumber = s.SeatNumber,
-                    Status = s.Status.ToString(),
-                    Price = bookingSeat?.Price,
-                    IsCancelled = bookingSeat?.IsCancelled
-                };
+                Id = s.Id,
+                SeatNumber = s.SeatNumber,
+                Status = s.Status.ToString(),
+                Price = s.Price,          
+                IsCancelled = false    
             }).ToList()
         };
     }
 
     public static Flight ToFlight(FlightRequestDto requestDto)
     {
-        return new Flight
+        var flight = new Flight
         {
-            From =  requestDto.From,
-            To =  requestDto.To,
+            From = requestDto.From,
+            To = requestDto.To,
             FlightNumber = requestDto.FlightNumber,
             Departure = requestDto.Departure,
             Arrival = requestDto.Arrival
         };
+
+        foreach (var seatDto in requestDto.Seats)
+        {
+            flight.Seats.Add(new Seat
+            {
+                SeatNumber = seatDto.SeatNumber,
+                Price = seatDto.Price,
+                Status = SeatStatus.Available
+            });
+        }
+
+        return flight;
     }
 }

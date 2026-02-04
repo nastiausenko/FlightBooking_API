@@ -7,10 +7,10 @@ public class BookingSeat
     public int Id { get; set; }
     
     public int BookingId { get; set; }
-    public required Booking Booking { get; set; }
+    public Booking Booking { get; set; } = null!;
     
     public int SeatId { get; set; }
-    public required Seat Seat { get; set; }
+    public Seat Seat { get; set; } = null!;
     
     public bool IsCancelled { get; set; } = false; 
     

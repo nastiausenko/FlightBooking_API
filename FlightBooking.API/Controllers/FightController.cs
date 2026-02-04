@@ -44,12 +44,12 @@ public class FlightController : ControllerBase
         var flight = FlightMapper.ToFlight(requestDto);
         await _flightService.AddFlightAsync(flight);
         
-        var dto = FlightMapper.ToFlightDto(flight);
+        var dto = FlightMapper.ToFlightDetailsDto(flight);
         return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateFlight(int id, [FromBody] FlightRequestDto requestDto)
+    public async Task<IActionResult> UpdateFlight(int id, [FromBody] UpdateFlightRequest requestDto)
     {
         var flight = await _flightService.GetFlightByIdAsync(id);
         if (flight == null)

@@ -1,7 +1,7 @@
 using FlightBooking.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace FlightBooking.Infrastructure;
+namespace FlightBooking.Infrastructure.Data;
 
 public class FlightBookingDbContext : DbContext
 {

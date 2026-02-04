@@ -4,11 +4,12 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>FlightBooking.Appication</RootNamespace>
+        <RootNamespace>FlightBooking.Application</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\FlightBooking.Domain\FlightBooking.Domain.csproj" />
+      <ProjectReference Include="..\FlightBooking.Infrastructure\FlightBooking.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

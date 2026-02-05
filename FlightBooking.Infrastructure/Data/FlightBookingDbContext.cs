@@ -17,4 +17,14 @@ public class FlightBookingDbContext : IdentityDbContext<ApplicationUser, Identit
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<BookingSeat> BookingSeats { get; set; }
     public DbSet<Seat> Seats { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ApplicationRole>().HasData(
+            new ApplicationRole { Id = 1, Name = "Passenger", NormalizedName = "PASSENGER" },
+            new ApplicationRole { Id = 2, Name = "Admin", NormalizedName = "ADMIN" }
+        );
+    }
 }

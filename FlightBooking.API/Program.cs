@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Role = FlightBooking.Domain.Role;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +23,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddDbContext<FlightBookingDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

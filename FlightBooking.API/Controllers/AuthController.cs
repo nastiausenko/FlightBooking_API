@@ -3,6 +3,7 @@ using FlightBooking.Application.Interfaces;
 using FlightBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlightBooking.Controllers;
 
@@ -12,11 +13,13 @@ public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ITokenService _tokenService;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
-    public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService)
+    public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService,  SignInManager<ApplicationUser> signInManager)
     {
         _userManager = userManager;
         _tokenService = tokenService;
+        _signInManager = signInManager;
     }
 
     [HttpPost("register")]
@@ -51,5 +54,33 @@ public class AuthController : ControllerBase
         };
 
         return Ok(response);
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginDto dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest();
+        }
+        
+        var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
+
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        
+        var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password,  false);
+
+        if (!result.Succeeded)
+        {
+            return Unauthorized();
+        }
+        
+        return Ok(new ResponseDto
+        {
+            Token = _tokenService.CreateToken(user)
+        });
     }
 }

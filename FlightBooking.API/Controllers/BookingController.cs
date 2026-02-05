@@ -1,12 +1,14 @@
 using FlightBooking.Application.Dtos.Booking;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightBooking.Controllers;
 
 [ApiController]
 [Route("api/bookings")]
+[Authorize]
 public class BookingController : ControllerBase
 {
     private readonly IBookingService _bookingService;

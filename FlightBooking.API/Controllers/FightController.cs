@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FlightBooking.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/flights")]
 public class FlightController : ControllerBase
 {
     private readonly IFlightService _flightService;

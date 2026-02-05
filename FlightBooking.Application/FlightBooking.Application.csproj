@@ -12,4 +12,8 @@
       <ProjectReference Include="..\FlightBooking.Infrastructure\FlightBooking.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0" />
+    </ItemGroup>
+
 </Project>

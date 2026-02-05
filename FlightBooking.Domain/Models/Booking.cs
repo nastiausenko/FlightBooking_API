@@ -8,7 +8,6 @@ public class Booking
     public DateTime BookingDate { get; set; }
     
     public int UserId { get; set; } 
-    public required User User { get; set; }
     
     public ICollection<BookingSeat> BookingSeats { get; set; } = new List<BookingSeat>();
     

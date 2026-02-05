@@ -31,8 +31,7 @@ public class BookingService : IBookingService
         }
 
         var booking = new Booking
-        {
-            User = user,          
+        {        
             UserId = user.Id,
             BookingDate = DateTime.UtcNow,
             IsCancelled = false,

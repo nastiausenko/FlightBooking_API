@@ -29,14 +29,7 @@ public static class FlightMapper
             FlightNumber = flight.FlightNumber,
             Departure = flight.Departure,
             Arrival = flight.Arrival,
-            Seats = flight.Seats.Select(s => new SeatDto
-            {
-                Id = s.Id,
-                SeatNumber = s.SeatNumber,
-                Status = s.Status.ToString(),
-                Price = s.Price,          
-                IsCancelled = false    
-            }).ToList()
+            Seats = flight.Seats.Select(SeatMapper.ToSeatDto).ToList()
         };
     }
 
@@ -51,14 +44,9 @@ public static class FlightMapper
             Arrival = requestDto.Arrival
         };
 
-        foreach (var seatDto in requestDto.Seats)
+        if (requestDto.Seats != null && requestDto.Seats.Any())
         {
-            flight.Seats.Add(new Seat
-            {
-                SeatNumber = seatDto.SeatNumber,
-                Price = seatDto.Price,
-                Status = SeatStatus.Available
-            });
+            flight.Seats = requestDto.Seats.Select(SeatMapper.ToSeat).ToList();
         }
 
         return flight;

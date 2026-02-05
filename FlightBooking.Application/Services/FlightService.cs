@@ -57,7 +57,9 @@ public class FlightService : IFlightService
     {
         var flight = await _dbContext.Flights.FirstOrDefaultAsync(f => f.Id == id);
         if (flight == null)
+        {
             return;
+        }
 
         _dbContext.Flights.Remove(flight);
         await _dbContext.SaveChangesAsync();

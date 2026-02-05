@@ -4,5 +4,5 @@ namespace FlightBooking.Application.Dtos.Flight;
 
 public class FlightDetailsDto : FlightDto
 {
-    public ICollection<SeatDto> Seats { get; set; } = new List<SeatDto>();
+    public List<SeatDto>? Seats { get; set; }
 }

@@ -11,5 +11,5 @@ public class CreateFlightRequestDto
     public DateTime Departure { get; set; }
     public DateTime Arrival { get; set; }
     
-    public List<SeatRequestDto> Seats { get; set; } = new();
+    public List<SeatRequestDto>? Seats { get; set; }
 }

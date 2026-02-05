@@ -60,6 +60,7 @@ public class BookingService : IBookingService
 
             bookingSeat.Seat = seat;
             bookingSeat.Price = seat.Price;
+            bookingSeat.IsCancelled = false;
 
             totalPrice += seat.Price;
         }
@@ -72,18 +73,115 @@ public class BookingService : IBookingService
         return booking;
     }
 
-    public Task<Booking> CancelBookingAsync(int bookingId)
+    public async Task<Booking> CancelBookingAsync(int bookingId)
     {
-        throw new NotImplementedException();
+        var  booking = await _dbContext.Bookings
+            .Include(b => b.BookingSeats)
+            .ThenInclude(bs => bs.Seat)
+            .FirstOrDefaultAsync(b => b.Id == bookingId);
+        
+        if (booking == null)
+        {
+            throw new KeyNotFoundException("Booking not found");
+        }
+
+        if (booking.IsCancelled)
+        {
+            throw new InvalidOperationException("Booking is already canceled");
+        }
+        
+        booking.IsCancelled = true;
+
+        foreach (var bookingSeat in  booking.BookingSeats )
+        {
+            bookingSeat.IsCancelled = true;
+            bookingSeat.Seat.Status = SeatStatus.Available;
+        }
+        
+        await _dbContext.SaveChangesAsync();
+        return booking;
     }
 
-    public Task<Booking> CancelBookingByAdminAsync(int? bookingId, int? userId)
+    public async Task<List<Booking>> CancelBookingByAdminAsync(int? bookingId, int? userId)
     {
-        throw new NotImplementedException();
+        if (!bookingId.HasValue && !userId.HasValue)
+        {
+            throw new ArgumentException("Either bookingId or userId should be provided");
+        }
+
+        var bookingsToCancel = new List<Booking>();
+        if (bookingId.HasValue)
+        {
+            var booking = await _dbContext.Bookings
+                .Include(b => b.BookingSeats)
+                .ThenInclude(bs => bs.Seat)
+                .FirstOrDefaultAsync(b => b.Id == bookingId.Value);
+
+            if (booking == null)
+            {
+                throw new KeyNotFoundException("Booking not found");
+            }
+
+            if (!booking.IsCancelled)
+            {
+                booking.IsCancelled = true;
+                foreach (var bookingSeat in booking.BookingSeats)
+                {
+                    bookingSeat.IsCancelled = true;
+                    bookingSeat.Seat.Status = SeatStatus.Available;
+                }
+                bookingsToCancel.Add(booking);
+            }
+        }
+        else if (userId.HasValue)
+        {
+            var userExists = await _dbContext.Users.AnyAsync(b => b.Id == userId.Value);
+            if (!userExists)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+            
+            var userBookings = await _dbContext.Bookings
+                .Where(b => b.UserId == userId.Value && !b.IsCancelled)
+                .Include(b => b.BookingSeats)
+                .ThenInclude(bs => bs.Seat)
+                .ToListAsync();
+
+            foreach (var booking in userBookings)
+            {
+                booking.IsCancelled = true;
+                foreach (var bookingSeat in booking.BookingSeats)
+                {
+                    bookingSeat.IsCancelled = true;
+                    bookingSeat.Seat.Status = SeatStatus.Available;
+                }
+                bookingsToCancel.Add(booking);
+            }
+        }
+        
+        await _dbContext.SaveChangesAsync();
+        return bookingsToCancel;
     }
 
-    public Task<List<Booking>?> GetUserBookingsAsync(int userId)
+    public async Task<List<Booking>> GetUserBookingsAsync(int userId)
     {
-        throw new NotImplementedException();
+        var exists = await _dbContext.Users.AnyAsync(user => user.Id == userId);
+        if (!exists)
+        {
+            throw new KeyNotFoundException("User not found");
+        }
+        
+        return await _dbContext.Bookings.Where(b => b.UserId == userId)
+            .Include(b => b.BookingSeats)
+            .ThenInclude(bs => bs.Seat)
+            .ToListAsync();
+    }
+    
+    public async Task<Booking?> GetBookingByIdAsync(int bookingId)
+    {
+        return await _dbContext.Bookings
+            .Include(b => b.BookingSeats)
+            .ThenInclude(bs => bs.Seat)
+            .FirstOrDefaultAsync(b => b.Id == bookingId);
     }
 }

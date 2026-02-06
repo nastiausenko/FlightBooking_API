@@ -1,6 +1,6 @@
 using FlightBooking.Application.Dtos.Seat;
 using FlightBooking.Application.Interfaces;
-using FlightBooking.Domain;
+using FlightBooking.Domain.Models;
 using FlightBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

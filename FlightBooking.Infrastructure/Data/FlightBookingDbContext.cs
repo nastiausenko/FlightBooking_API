@@ -1,4 +1,4 @@
-using FlightBooking.Domain;
+using FlightBooking.Domain.Models;
 using FlightBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -10,9 +10,8 @@ public class FlightBookingDbContext : IdentityDbContext<ApplicationUser, Identit
 {
     public FlightBookingDbContext(DbContextOptions options) : base(options)
     {
-        
     }
-    
+
     public DbSet<Flight> Flights { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<BookingSeat> BookingSeats { get; set; }

@@ -9,7 +9,7 @@ public class AuthorizeCheckOperationFilter : IOperationFilter
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         var hasAuthorize = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
-                               .OfType<AuthorizeAttribute>().Any() 
+                               .OfType<AuthorizeAttribute>().Any()
                            || context.MethodInfo.GetCustomAttributes(true)
                                .OfType<AuthorizeAttribute>().Any();
 
@@ -29,6 +29,7 @@ public class AuthorizeCheckOperationFilter : IOperationFilter
             ] = Array.Empty<string>()
         };
 
-        operation.Security = new List<OpenApiSecurityRequirement> { securityRequirement };;
+        operation.Security = new List<OpenApiSecurityRequirement> { securityRequirement };
+        ;
     }
 }

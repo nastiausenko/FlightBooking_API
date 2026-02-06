@@ -12,7 +12,7 @@ namespace FlightBooking.Controllers;
 public class FlightController : ControllerBase
 {
     private readonly IFlightService _flightService;
-    
+
     public FlightController(IFlightService flightService)
     {
         _flightService = flightService;
@@ -26,10 +26,10 @@ public class FlightController : ControllerBase
         return Ok(dto);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<FlightDetailsDto>> GetById(int id)
+    [HttpGet("{flightId:int}")]
+    public async Task<ActionResult<FlightDetailsDto>> GetById(int flightId)
     {
-        var flight = await _flightService.GetFlightByIdAsync(id);
+        var flight = await _flightService.GetFlightByIdAsync(flightId);
         
         if (flight == null)
         {
@@ -46,16 +46,16 @@ public class FlightController : ControllerBase
     {
         var flight = FlightMapper.ToFlight(requestDto);
         await _flightService.AddFlightAsync(flight);
-        
+
         var dto = FlightMapper.ToFlightDetailsDto(flight);
         return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{flightId:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UpdateFlight(int id, [FromBody] UpdateFlightRequestDto updateDto)
+    public async Task<IActionResult> UpdateFlight(int flightId, [FromBody] UpdateFlightRequestDto updateDto)
     {
-        var updatedFlight = await _flightService.UpdateFlightAsync(id, updateDto);
+        var updatedFlight = await _flightService.UpdateFlightAsync(flightId, updateDto);
         if (updatedFlight == null)
         {
             return NotFound();
@@ -64,11 +64,11 @@ public class FlightController : ControllerBase
         return Ok(FlightMapper.ToFlightDto(updatedFlight));
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{flightId:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteFlight(int id)
+    public async Task<IActionResult> DeleteFlight(int flightId)
     {
-        await _flightService.DeleteFlightAsync(id);
+        await _flightService.DeleteFlightAsync(flightId);
         return NoContent();
     }
 }

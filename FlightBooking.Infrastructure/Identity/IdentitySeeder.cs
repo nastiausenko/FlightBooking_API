@@ -11,12 +11,11 @@ public static class IdentitySeeder
         using var scope = serviceProvider.CreateScope();
         var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
 
         var adminUsername = configuration["Admin:Username"];
         var adminEmail = configuration["Admin:Email"];
         var adminPassword = configuration["Admin:Password"];
-        
+
         var admin = await userManager.FindByEmailAsync(adminEmail);
         if (admin == null)
         {
@@ -24,9 +23,9 @@ public static class IdentitySeeder
             {
                 UserName = adminUsername,
                 Email = adminEmail,
-                EmailConfirmed = true,
+                EmailConfirmed = true
             };
-            
+
             var result = await userManager.CreateAsync(admin, adminPassword);
             if (!result.Succeeded)
             {

@@ -1,5 +1,5 @@
 using FlightBooking.Application.Dtos.BookingSeat;
-using FlightBooking.Domain;
+using FlightBooking.Domain.Models;
 
 namespace FlightBooking.Application.Mappers;
 
@@ -14,7 +14,7 @@ public static class BookingSeatMapper
             BookingId = bookingSeat.BookingId,
             SeatNumber = bookingSeat.Seat.SeatNumber,
             IsCancelled = bookingSeat.IsCancelled,
-            Price = bookingSeat.Price,
+            Price = bookingSeat.Price
         };
     }
 
@@ -22,7 +22,7 @@ public static class BookingSeatMapper
     {
         return new BookingSeat
         {
-            SeatId = dto.SeatId,
+            SeatId = dto.SeatId
         };
     }
 }

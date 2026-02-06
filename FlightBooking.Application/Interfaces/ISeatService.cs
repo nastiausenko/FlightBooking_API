@@ -1,5 +1,5 @@
 using FlightBooking.Application.Dtos.Seat;
-using FlightBooking.Domain;
+using FlightBooking.Domain.Models;
 
 namespace FlightBooking.Application.Interfaces;
 

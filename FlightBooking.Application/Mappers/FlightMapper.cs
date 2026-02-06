@@ -1,6 +1,5 @@
 using FlightBooking.Application.Dtos.Flight;
-using FlightBooking.Application.Dtos.Seat;
-using FlightBooking.Domain;
+using FlightBooking.Domain.Models;
 
 namespace FlightBooking.Application.Mappers;
 
@@ -18,7 +17,7 @@ public static class FlightMapper
             Departure = flight.Departure
         };
     }
-    
+
     public static FlightDetailsDto ToFlightDetailsDto(Flight flight)
     {
         return new FlightDetailsDto

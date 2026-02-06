@@ -1,7 +1,7 @@
 using FlightBooking.Application.Dtos.Booking;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Mappers;
-using FlightBooking.Domain;
+using FlightBooking.Domain.Models;
 using FlightBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,7 +15,7 @@ public class BookingService : IBookingService
     {
         _dbContext = dbContext;
     }
-    
+
     public async Task<Booking> CreateBookingAsync(int userId, BookingRequestDto dto)
     {
         if (dto.BookingSeats == null || !dto.BookingSeats.Any())
@@ -24,7 +24,7 @@ public class BookingService : IBookingService
         }
 
         var booking = new Booking
-        {        
+        {
             UserId = userId,
             BookingDate = DateTime.UtcNow,
             IsCancelled = false,
@@ -67,7 +67,7 @@ public class BookingService : IBookingService
 
     public async Task<Booking> CancelBookingAsync(int bookingId)
     {
-        var  booking = await _dbContext.Bookings
+        var booking = await _dbContext.Bookings
             .Include(b => b.BookingSeats)
             .ThenInclude(bs => bs.Seat)
             .FirstOrDefaultAsync(b => b.Id == bookingId);
@@ -84,12 +84,12 @@ public class BookingService : IBookingService
         
         booking.IsCancelled = true;
 
-        foreach (var bookingSeat in  booking.BookingSeats )
+        foreach (var bookingSeat in booking.BookingSeats)
         {
             bookingSeat.IsCancelled = true;
             bookingSeat.Seat.Status = SeatStatus.Available;
         }
-        
+
         await _dbContext.SaveChangesAsync();
         return booking;
     }
@@ -122,6 +122,7 @@ public class BookingService : IBookingService
                     bookingSeat.IsCancelled = true;
                     bookingSeat.Seat.Status = SeatStatus.Available;
                 }
+                
                 bookingsToCancel.Add(booking);
             }
         }
@@ -147,10 +148,11 @@ public class BookingService : IBookingService
                     bookingSeat.IsCancelled = true;
                     bookingSeat.Seat.Status = SeatStatus.Available;
                 }
+
                 bookingsToCancel.Add(booking);
             }
         }
-        
+
         await _dbContext.SaveChangesAsync();
         return bookingsToCancel;
     }
@@ -162,7 +164,7 @@ public class BookingService : IBookingService
             .ThenInclude(bs => bs.Seat)
             .ToListAsync();
     }
-    
+
     public async Task<Booking?> GetBookingByIdAsync(int bookingId)
     {
         return await _dbContext.Bookings

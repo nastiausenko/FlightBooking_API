@@ -1,13 +1,13 @@
 using FlightBooking.Application.Dtos.Booking;
-using FlightBooking.Domain;
+using FlightBooking.Domain.Models;
 
 namespace FlightBooking.Application.Interfaces;
 
 public interface IBookingService
 {
-    Task<Booking> CreateBookingAsync(int userId, BookingRequestDto booking); //TODO temporary, instead of JWT
-    Task<Booking> CancelBookingAsync(int bookingId); //for user
-    Task<List<Booking>> CancelBookingByAdminAsync(int? bookingId, int? userId); //for admin
-    Task<List<Booking>> GetUserBookingsAsync(int userId); //TODO temporary, instead of JWT
+    Task<Booking> CreateBookingAsync(int userId, BookingRequestDto booking);
+    Task<Booking> CancelBookingAsync(int bookingId);
+    Task<List<Booking>> CancelBookingByAdminAsync(int? bookingId, int? userId);
+    Task<List<Booking>> GetUserBookingsAsync(int userId);
     Task<Booking?> GetBookingByIdAsync(int bookingId);
 }

@@ -12,15 +12,15 @@ public class AuthService : IAuthService
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ITokenService _tokenService;
 
-    public AuthService(UserManager<ApplicationUser> userManager, 
-                       SignInManager<ApplicationUser> signInManager, 
-                       ITokenService tokenService)
+    public AuthService(UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        ITokenService tokenService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _tokenService = tokenService;
     }
-    
+
     public async Task<string> RegisterAsync(RegisterDto dto)
     {
         var user = new ApplicationUser
@@ -28,7 +28,7 @@ public class AuthService : IAuthService
             UserName = dto.Username,
             Email = dto.Email
         };
-        
+
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
         {

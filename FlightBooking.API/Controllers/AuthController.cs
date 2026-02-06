@@ -1,9 +1,6 @@
 using FlightBooking.Application.Dtos.Auth;
 using FlightBooking.Application.Interfaces;
-using FlightBooking.Infrastructure.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FlightBooking.Controllers;
 

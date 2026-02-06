@@ -15,25 +15,25 @@ public class TokenService : ITokenService
     private readonly IConfiguration _configuration;
     private readonly SymmetricSecurityKey _securityKey;
     private readonly UserManager<ApplicationUser> _userManager;
-    
-    public TokenService(IConfiguration configuration,  UserManager<ApplicationUser> userManager)
+
+    public TokenService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
     {
         _configuration = configuration;
         _securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         _userManager = userManager;
     }
-    
+
     public async Task<string> CreateTokenAsync(ApplicationUser user)
     {
         var roles = await _userManager.GetRolesAsync(user);
-        
+
         var claims = new List<Claim>
         {
-            new (JwtRegisteredClaimNames.Email, user.Email),
-            new (JwtRegisteredClaimNames.GivenName, user.UserName),
-            new (ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email),
+            new(JwtRegisteredClaimNames.GivenName, user.UserName),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString())
         };
-        
+
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         var creds = new SigningCredentials(_securityKey, SecurityAlgorithms.HmacSha512Signature);
@@ -46,7 +46,7 @@ public class TokenService : ITokenService
             Expires = expires,
             SigningCredentials = creds,
             Issuer = _configuration["Jwt:Issuer"],
-            Audience = _configuration["Jwt:Audience"],
+            Audience = _configuration["Jwt:Audience"]
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

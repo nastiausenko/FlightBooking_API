@@ -23,25 +23,25 @@ public class BookingController : ControllerBase
     public async Task<ActionResult<BookingDto>> CreateBooking([FromBody] BookingRequestDto requestDto)
     {
         var userId = GetUserId();
-        
+
         var booking = await _bookingService.CreateBookingAsync(userId, requestDto);
         return Ok(BookingMapper.ToBookingDto(booking));
     }
 
-    [HttpGet]
+    [HttpGet("my")]
     public async Task<ActionResult<IEnumerable<BookingDto>>> GetUserBookingsAsync()
     {
         var userId = GetUserId();
-        
+
         var bookings = await _bookingService.GetUserBookingsAsync(userId);
         return Ok(bookings.Select(BookingMapper.ToBookingDto));
     }
 
-    [HttpPut("{id}/cancel")]
-    public async Task<ActionResult<BookingDto>> CancelBooking([FromRoute] int id)
+    [HttpPut("{bookingId:int}/cancel")]
+    public async Task<ActionResult<BookingDto>> CancelBooking(int bookingId)
     {
         var userId = GetUserId();
-        var booking = await _bookingService.GetBookingByIdAsync(id);
+        var booking = await _bookingService.GetBookingByIdAsync(bookingId);
         
         if (booking == null)
         {
@@ -53,13 +53,13 @@ public class BookingController : ControllerBase
             return Forbid();
         }
 
-        booking = await _bookingService.CancelBookingAsync(id);
+        booking = await _bookingService.CancelBookingAsync(bookingId);
 
         return Ok(BookingMapper.ToBookingDto(booking));
     }
-    
+
     [Authorize(Roles = "Admin")]
-    [HttpPut("admin/cancel")]
+    [HttpPut("cancel")]
     public async Task<ActionResult<IEnumerable<BookingDto>>> CancelBookingByAdmin(
         [FromQuery] int? bookingId,
         [FromQuery] int? userId)

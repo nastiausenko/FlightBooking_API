@@ -11,76 +11,23 @@ namespace FlightBooking.Controllers;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ITokenService _tokenService;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-
-    public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService,  SignInManager<ApplicationUser> signInManager)
+    private readonly IAuthService _authService;
+    public AuthController(IAuthService authService)
     {
-        _userManager = userManager;
-        _tokenService = tokenService;
-        _signInManager = signInManager;
+        _authService = authService;
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var user = new ApplicationUser
-        {
-            UserName = dto.Username,
-            Email = dto.Email,
-        };
-
-        var result = await _userManager.CreateAsync(user, dto.Password);
-
-        if (!result.Succeeded)
-        {
-            return BadRequest();
-        }
-
-        var roleResult = await _userManager.AddToRoleAsync(user, "Passenger");
-        if (!roleResult.Succeeded)
-        {
-            return BadRequest();
-        }
-
-        var token = await _tokenService.CreateTokenAsync(user);
-        var response = new ResponseDto
-        {
-            Token = token
-        };
-
-        return Ok(response);
+        var token = await _authService.RegisterAsync(dto);
+        return Ok(new ResponseDto { Token = token });
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest();
-        }
-        
-        var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
-
-        if (user == null)
-        {
-            return Unauthorized();
-        }
-        
-        var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password,  false);
-
-        if (!result.Succeeded)
-        {
-            return Unauthorized();
-        }
-        
-        return Ok(new ResponseDto
-        {
-            Token = await _tokenService.CreateTokenAsync(user)
-        });
+        var token = await _authService.LoginAsync(dto);
+        return Ok(new ResponseDto { Token = token });
     }
 }

@@ -43,6 +43,7 @@ builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddDbContext<FlightBookingDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -13,8 +13,7 @@ public static class SeatMapper
             FlightId = seat.FlightId,
             SeatNumber = seat.SeatNumber,
             Status = seat.Status.ToString(),
-            Price = seat.Price,
-            IsCancelled = false
+            Price = seat.Price
         };
     }
 

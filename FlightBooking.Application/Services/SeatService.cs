@@ -51,13 +51,24 @@ public class SeatService : ISeatService
 
     public async Task DeleteSeatAsync(int id)
     {
-        var seat = await _dbContext.Seats.FirstOrDefaultAsync(s => s.Id == id);
+        var seat = await _dbContext.Seats
+            .Include(s => s.BookingSeats)
+            .ThenInclude(bs => bs.Booking)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
         if (seat == null)
-        {
             return;
+
+        foreach (var bookingSeat in seat.BookingSeats)
+        {
+            var booking = bookingSeat.Booking;
+            booking.TotalPrice -= bookingSeat.Price;
+
+            _dbContext.BookingSeats.Remove(bookingSeat);
         }
-        
+
         _dbContext.Seats.Remove(seat);
+
         await _dbContext.SaveChangesAsync();
     }
 

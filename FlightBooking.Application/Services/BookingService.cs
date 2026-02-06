@@ -15,8 +15,7 @@ public class BookingService : IBookingService
     {
         _dbContext = dbContext;
     }
-
-
+    
     public async Task<Booking> CreateBookingAsync(int userId, BookingRequestDto dto)
     {
         if (dto.BookingSeats == null || !dto.BookingSeats.Any())
@@ -24,15 +23,9 @@ public class BookingService : IBookingService
             throw new ArgumentException("No seats provided for booking");
         }
 
-        var user = await _dbContext.Users.FindAsync(userId);
-        if (user == null)
-        {
-            throw new KeyNotFoundException("User not found");
-        }
-
         var booking = new Booking
         {        
-            UserId = user.Id,
+            UserId = userId,
             BookingDate = DateTime.UtcNow,
             IsCancelled = false,
             BookingSeats = dto.BookingSeats.Select(BookingSeatMapper.ToBookingSeat).ToList()
@@ -164,12 +157,6 @@ public class BookingService : IBookingService
 
     public async Task<List<Booking>> GetUserBookingsAsync(int userId)
     {
-        var exists = await _dbContext.Users.AnyAsync(user => user.Id == userId);
-        if (!exists)
-        {
-            throw new KeyNotFoundException("User not found");
-        }
-        
         return await _dbContext.Bookings.Where(b => b.UserId == userId)
             .Include(b => b.BookingSeats)
             .ThenInclude(bs => bs.Seat)

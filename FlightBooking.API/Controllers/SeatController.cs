@@ -1,12 +1,14 @@
 using FlightBooking.Application.Dtos.Seat;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightBooking.Controllers;
 
 [ApiController]
 [Route("api/")]
+[Authorize(Roles = "Admin")]
 public class SeatController : ControllerBase
 {
     private readonly ISeatService _seatService;

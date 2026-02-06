@@ -84,6 +84,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+await IdentitySeeder.SeedAdminAsync(app.Services);
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

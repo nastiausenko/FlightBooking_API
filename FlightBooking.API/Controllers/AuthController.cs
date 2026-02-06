@@ -47,7 +47,7 @@ public class AuthController : ControllerBase
             return BadRequest();
         }
 
-        var token = _tokenService.CreateToken(user);
+        var token = await _tokenService.CreateTokenAsync(user);
         var response = new ResponseDto
         {
             Token = token
@@ -80,7 +80,7 @@ public class AuthController : ControllerBase
         
         return Ok(new ResponseDto
         {
-            Token = _tokenService.CreateToken(user)
+            Token = await _tokenService.CreateTokenAsync(user)
         });
     }
 }

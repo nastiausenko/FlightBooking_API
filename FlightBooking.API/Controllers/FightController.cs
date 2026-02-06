@@ -1,12 +1,14 @@
 using FlightBooking.Application.Dtos.Flight;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightBooking.Controllers;
 
 [ApiController]
 [Route("api/flights")]
+[Authorize]
 public class FlightController : ControllerBase
 {
     private readonly IFlightService _flightService;
@@ -39,6 +41,7 @@ public class FlightController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<FlightDto>> CreateFlight([FromBody] CreateFlightRequestDto requestDto)
     {
         var flight = FlightMapper.ToFlight(requestDto);
@@ -49,6 +52,7 @@ public class FlightController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateFlight(int id, [FromBody] UpdateFlightRequestDto updateDto)
     {
         var updatedFlight = await _flightService.UpdateFlightAsync(id, updateDto);
@@ -61,6 +65,7 @@ public class FlightController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteFlight(int id)
     {
         await _flightService.DeleteFlightAsync(id);

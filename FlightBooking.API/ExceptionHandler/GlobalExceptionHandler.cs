@@ -1,5 +1,7 @@
-using FlightBooking.Application.Exceptions;
-using FlightBooking.Application.Services;
+using FlightBooking.Application.Exceptions.Auth;
+using FlightBooking.Application.Exceptions.Booking;
+using FlightBooking.Application.Exceptions.Flight;
+using FlightBooking.Application.Exceptions.Seat;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 

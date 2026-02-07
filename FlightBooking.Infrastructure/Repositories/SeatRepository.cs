@@ -47,6 +47,11 @@ public class SeatRepository(FlightBookingDbContext dbContext) : ISeatRepository
         await dbContext.SaveChangesAsync();
     }
 
+    public async Task<bool> ExistsByFlightIdAndNumberAsync(int flightId, string seatNumber)
+    {
+        return await  dbContext.Seats.AnyAsync(s => s.FlightId == flightId && s.SeatNumber == seatNumber);
+    }
+
     public async Task SaveChangesAsync()
     {
         await dbContext.SaveChangesAsync();

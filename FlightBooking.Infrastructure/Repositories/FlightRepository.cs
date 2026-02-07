@@ -48,4 +48,9 @@ public class FlightRepository(FlightBookingDbContext dbContext) : IFlightReposit
     {
         return await dbContext.Flights.AnyAsync(f => f.Id == flightId);
     }
+
+    public async Task<bool> ExistsByNumberAsync(string flightNumber)
+    {
+       return await dbContext.Flights.AnyAsync(f => f.FlightNumber == flightNumber);
+    }
 }

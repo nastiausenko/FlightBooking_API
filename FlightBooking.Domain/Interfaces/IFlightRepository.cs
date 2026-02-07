@@ -10,4 +10,5 @@ public interface IFlightRepository
     Task UpdateAsync(int id, Flight model);
     Task DeleteAsync(int flightId);
     Task<bool> ExistsByIdAsync(int flightId);
+    Task<bool> ExistsByNumberAsync(string flightNumber);
 }

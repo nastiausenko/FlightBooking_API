@@ -8,6 +8,7 @@ using FlightBooking.Infrastructure.Identity;
 using FlightBooking.Infrastructure.Repositories;
 using FlightBooking.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -18,7 +19,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddSwaggerGen(option =>
 {
@@ -82,6 +82,28 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .ToDictionary(e =>
+                e.Key,
+                e => e.Value!.Errors.Select(error => error.ErrorMessage).ToArray());
+
+        var problemDetails = new ValidationProblemDetails(errors)
+        {
+            Type = "https://httpstatuses.com/400",
+            Title = "Validation failed",
+            Status = StatusCodes.Status400BadRequest,
+            Instance = context.HttpContext.Request.Path
+        };
+
+        return new BadRequestObjectResult(problemDetails);
     };
 });
 

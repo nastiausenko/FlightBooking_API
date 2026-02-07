@@ -20,11 +20,6 @@ public class BookingService : IBookingService
 
     public async Task<Booking> CreateBookingAsync(int userId, BookingRequestDto dto)
     {
-        // if (dto.BookingSeats == null || !dto.BookingSeats.Any())
-        // {
-        //     throw new ArgumentException("No seats provided for booking"); //TODO
-        // }
-
         var booking = BookingMapper.ToBooking(dto);
         booking.UserId = userId;
         booking.BookingDate = DateTime.UtcNow;

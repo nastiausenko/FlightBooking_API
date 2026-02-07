@@ -25,7 +25,7 @@ public class SeatController : ControllerBase
         await _seatService.AddSeatToFlightAsync(flightId, seat);
         
         var dto = SeatMapper.ToSeatDto(seat);
-        return CreatedAtAction(nameof(GetSeatById), new { id = dto.Id }, dto);
+        return CreatedAtAction(nameof(GetSeatById), new { seatId = dto.Id }, dto);
     }
 
     [HttpPut("seats/{seatId:int}")]

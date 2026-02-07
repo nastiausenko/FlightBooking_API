@@ -43,7 +43,7 @@ public class FlightController : ControllerBase
         await _flightService.AddFlightAsync(flight);
 
         var dto = FlightMapper.ToFlightDetailsDto(flight);
-        return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+        return CreatedAtAction(nameof(GetById), new { flightId = dto.Id }, dto);
     }
 
     [HttpPut("{flightId:int}")]

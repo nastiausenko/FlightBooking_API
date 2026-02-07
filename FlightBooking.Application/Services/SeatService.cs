@@ -1,4 +1,5 @@
 using FlightBooking.Application.Dtos.Seat;
+using FlightBooking.Application.Exceptions;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Domain.Interfaces;
 using FlightBooking.Domain.Models;
@@ -21,7 +22,7 @@ public class SeatService : ISeatService
         var flight = await _flightRepository.GetByIdAsync(flightId);
         if (flight == null)
         {
-            throw new KeyNotFoundException("Flight not found");
+            throw new FlightNotFoundException(flightId);
         }
         
         seat.FlightId = flightId;
@@ -31,12 +32,12 @@ public class SeatService : ISeatService
         return seat;
     }
 
-    public async Task<Seat?> UpdateSeatAsync(int id, SeatRequestDto requestDto)
+    public async Task<Seat> UpdateSeatAsync(int id, SeatRequestDto requestDto)
     {
         var seat = await _seatRepository.GetByIdAsync(id);
         if (seat == null)
         {
-            return null;
+            throw new SeatNotFoundException(id);
         }
         
         seat.Price = requestDto.Price;
@@ -52,7 +53,7 @@ public class SeatService : ISeatService
 
         if (seat == null)
         {
-            return;
+            throw new SeatNotFoundException(id);
         }
 
         foreach (var bookingSeat in seat.BookingSeats)
@@ -64,17 +65,16 @@ public class SeatService : ISeatService
         await _seatRepository.DeleteAsync(seat);
     }
 
-    public async Task<Seat?> GetSeatByIdAsync(int id)
-    {
-        return await _seatRepository.GetByIdAsync(id);
-    }
-
+    public async Task<Seat> GetSeatByIdAsync(int id) => 
+        await _seatRepository.GetByIdAsync(id) 
+        ?? throw new SeatNotFoundException(id);
+    
     public async Task<List<Seat>> GetAllByFlightIdAsync(int flightId)
     {
         var flight = await _flightRepository.GetByIdAsync(flightId);
         if (flight == null)
         {
-            throw new KeyNotFoundException("Flight not found");
+            throw new FlightNotFoundException(flightId);
         }
         
         return await _seatRepository.GetByFlightIdAsync(flightId);

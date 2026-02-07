@@ -32,11 +32,6 @@ public class SeatController : ControllerBase
     public async Task<IActionResult> UpdateSeat(int seatId, [FromBody] SeatRequestDto seatDto)
     {
         var seat = await _seatService.UpdateSeatAsync(seatId, seatDto);
-        if (seat == null)
-        {
-            return NotFound();
-        }
-        
         return Ok(SeatMapper.ToSeatDto(seat));
     }
 
@@ -44,10 +39,6 @@ public class SeatController : ControllerBase
     public async Task<IActionResult> GetSeatById(int seatId)
     {
         var result = await _seatService.GetSeatByIdAsync(seatId);
-        if (result == null)
-        {
-            return NotFound();
-        }
         
         return Ok(SeatMapper.ToSeatDto(result));
     }

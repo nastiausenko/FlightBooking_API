@@ -1,4 +1,5 @@
 using FlightBooking.Application.Dtos.Booking;
+using FlightBooking.Application.Exceptions;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Mappers;
 using FlightBooking.Domain.Interfaces;
@@ -19,30 +20,24 @@ public class BookingService : IBookingService
 
     public async Task<Booking> CreateBookingAsync(int userId, BookingRequestDto dto)
     {
-        if (dto.BookingSeats == null || !dto.BookingSeats.Any())
-        {
-            throw new ArgumentException("No seats provided for booking");
-        }
+        // if (dto.BookingSeats == null || !dto.BookingSeats.Any())
+        // {
+        //     throw new ArgumentException("No seats provided for booking"); //TODO
+        // }
 
-        var booking = new Booking
-        {
-            UserId = userId,
-            BookingDate = DateTime.UtcNow,
-            IsCancelled = false,
-            BookingSeats = dto.BookingSeats.Select(BookingSeatMapper.ToBookingSeat).ToList()
-        };
+        var booking = BookingMapper.ToBooking(dto);
+        booking.UserId = userId;
+        booking.BookingDate = DateTime.UtcNow;
 
         var seatIds = booking.BookingSeats.Select(s => s.SeatId).ToList();
         var seats = await _seatRepository.GetByIdsAsync(seatIds);
+        
+        var foundSeatIds = seats.Select(s => s.Id).ToHashSet();
+        var missingSeatIds = seatIds.Where(id => !foundSeatIds.Contains(id)).ToList();
 
-        if (seats == null)
+        if (missingSeatIds.Count > 0)
         {
-            throw new KeyNotFoundException("Seat not found");
-        }
-
-        if (seats.Count != seatIds.Count)
-        {
-            throw new InvalidOperationException("One or more seats not found");
+            throw new SeatNotFoundException(missingSeatIds.ToArray());
         }
 
         decimal totalPrice = 0;
@@ -51,7 +46,7 @@ public class BookingService : IBookingService
         {
             if (seat.Status != SeatStatus.Available)
             {
-                throw new InvalidOperationException($"Seat {seat.SeatNumber} is not available");
+                throw new SeatNotAvailableException(seat.Id);
             }
 
             seat.Status = SeatStatus.Booked;
@@ -71,17 +66,22 @@ public class BookingService : IBookingService
         return booking;
     }
 
-    public async Task<Booking> CancelBookingAsync(int bookingId)
+    public async Task<Booking> CancelBookingAsync(int bookingId, int userId, bool isAdmin)
     {
         var booking = await _bookingRepository.GetByIdAsync(bookingId);
         if (booking == null)
         {
-            throw new KeyNotFoundException("Booking not found");
+            throw new BookingNotFoundException(bookingId);
         }
 
         if (booking.IsCancelled)
         {
-            throw new InvalidOperationException("Booking is already canceled");
+            throw new BookingAlreadyCanceledException(bookingId);
+        }
+
+        if (!isAdmin && booking.UserId != userId)
+        {
+            throw new ForbiddenException("You are not allowed to cancel this booking");
         }
         
         booking.IsCancelled = true;
@@ -99,9 +99,9 @@ public class BookingService : IBookingService
     public async Task<List<Booking>> CancelUserBookingsByAdminAsync(int userId)
     {
         var bookings = await _bookingRepository.GetActiveByUserIdAsync(userId);
-        if (!bookings.Any())
+        if (bookings.Count == 0)
         {
-           throw new KeyNotFoundException("No active bookings found");
+           throw new NoActiveBookingsException(userId);
         }
         
         foreach (var booking in bookings)
@@ -122,8 +122,7 @@ public class BookingService : IBookingService
         return await _bookingRepository.GetByUserIdAsync(userId);
     }
 
-    public async Task<Booking?> GetBookingByIdAsync(int bookingId)
-    {
-        return await _bookingRepository.GetByIdAsync(bookingId);
-    }
+    public async Task<Booking?> GetBookingByIdAsync(int bookingId) => 
+        await _bookingRepository.GetByIdAsync(bookingId)
+        ?? throw new BookingNotFoundException(bookingId);
 }

@@ -32,7 +32,7 @@ public class AuthService : IAuthService
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
         {
-            throw new ApplicationException("An error occured while registering the user.");
+            throw new ApplicationException("An error occured while registering the user."); //TODO
         }
         
         await _userManager.AddToRoleAsync(user, "Passenger");
@@ -43,11 +43,15 @@ public class AuthService : IAuthService
     {
         var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
         if (user == null)
+        {
             throw new UnauthorizedAccessException();
+        } 
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
         if (!result.Succeeded)
+        {
             throw new UnauthorizedAccessException();
+        }
 
         return await _tokenService.CreateTokenAsync(user);
     }

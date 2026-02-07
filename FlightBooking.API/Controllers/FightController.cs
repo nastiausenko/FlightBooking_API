@@ -31,11 +31,6 @@ public class FlightController : ControllerBase
     {
         var flight = await _flightService.GetFlightByIdAsync(flightId);
         
-        if (flight == null)
-        {
-            return NotFound();
-        }
-        
         var dto = FlightMapper.ToFlightDetailsDto(flight);
         return Ok(dto);
     }
@@ -56,10 +51,6 @@ public class FlightController : ControllerBase
     public async Task<IActionResult> UpdateFlight(int flightId, [FromBody] UpdateFlightRequestDto updateDto)
     {
         var updatedFlight = await _flightService.UpdateFlightAsync(flightId, updateDto);
-        if (updatedFlight == null)
-        {
-            return NotFound();
-        }
         
         return Ok(FlightMapper.ToFlightDto(updatedFlight));
     }

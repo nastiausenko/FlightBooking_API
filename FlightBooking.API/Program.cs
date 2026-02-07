@@ -2,6 +2,7 @@ using System.Text;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Services;
 using FlightBooking.Domain.Interfaces;
+using FlightBooking.ExceptionHandlers;
 using FlightBooking.Infrastructure.Data;
 using FlightBooking.Infrastructure.Identity;
 using FlightBooking.Infrastructure.Repositories;
@@ -40,6 +41,9 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 });
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddScoped<IFlightService, FlightService>();
 builder.Services.AddScoped<ISeatService, SeatService>();
@@ -91,6 +95,8 @@ if (app.Environment.IsDevelopment())
 }
 
 await IdentitySeeder.SeedAdminAsync(app.Services);
+
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

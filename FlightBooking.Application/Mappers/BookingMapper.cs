@@ -16,4 +16,13 @@ public static class BookingMapper
             BookingSeats = booking.BookingSeats.Select(BookingSeatMapper.ToBookingSeatDto).ToList()
         };
     }
+
+    public static Booking ToBooking(BookingRequestDto dto)
+    {
+        return new Booking
+        {
+            BookingSeats = dto.BookingSeats.Select(BookingSeatMapper.ToBookingSeat).ToList(),
+            IsCancelled = false
+        };
+    }
 }

@@ -9,20 +9,13 @@ namespace FlightBooking.Controllers;
 [ApiController]
 [Route("api/")]
 [Authorize(Roles = "Admin")]
-public class SeatController : ControllerBase
+public class SeatController(ISeatService seatService) : ControllerBase
 {
-    private readonly ISeatService _seatService;
-    
-    public SeatController(ISeatService seatService)
-    {
-        _seatService = seatService;
-    }
-
     [HttpPost("flights/{flightId:int}/seats")]
     public async Task<IActionResult> AddSeat(int flightId, [FromBody] SeatRequestDto requestDto)
     {
         var seat = SeatMapper.ToSeat(requestDto);
-        await _seatService.AddSeatToFlightAsync(flightId, seat);
+        await seatService.AddSeatToFlightAsync(flightId, seat);
         
         var dto = SeatMapper.ToSeatDto(seat);
         return CreatedAtAction(nameof(GetSeatById), new { seatId = dto.Id }, dto);
@@ -31,14 +24,14 @@ public class SeatController : ControllerBase
     [HttpPut("seats/{seatId:int}")]
     public async Task<IActionResult> UpdateSeat(int seatId, [FromBody] SeatRequestDto seatDto)
     {
-        var seat = await _seatService.UpdateSeatAsync(seatId, seatDto);
+        var seat = await seatService.UpdateSeatAsync(seatId, seatDto);
         return Ok(SeatMapper.ToSeatDto(seat));
     }
 
     [HttpGet("seats/{seatId:int}")]
     public async Task<IActionResult> GetSeatById(int seatId)
     {
-        var result = await _seatService.GetSeatByIdAsync(seatId);
+        var result = await seatService.GetSeatByIdAsync(seatId);
         
         return Ok(SeatMapper.ToSeatDto(result));
     }
@@ -46,7 +39,7 @@ public class SeatController : ControllerBase
     [HttpGet("flights/{flightId:int}/seats")]
     public async Task<ActionResult<IEnumerable<SeatDto>>> GetSeatByFlightId(int flightId)
     {
-        var seats = await _seatService.GetAllByFlightIdAsync(flightId);
+        var seats = await seatService.GetAllByFlightIdAsync(flightId);
         var dto = seats.Select(SeatMapper.ToSeatDto);
         return Ok(dto);
     }
@@ -54,7 +47,7 @@ public class SeatController : ControllerBase
     [HttpDelete("seats/{seatId:int}")]
     public async Task<IActionResult> DeleteSeat(int seatId)
     {
-        await _seatService.DeleteSeatAsync(seatId);
+        await seatService.DeleteSeatAsync(seatId);
         return NoContent();
     }
 }

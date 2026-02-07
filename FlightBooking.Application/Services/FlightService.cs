@@ -7,46 +7,32 @@ using FlightBooking.Domain.Models;
 
 namespace FlightBooking.Application.Services;
 
-public class FlightService : IFlightService
+public class FlightService(IFlightRepository flightRepository) : IFlightService
 {
-    private readonly IFlightRepository _flightRepository;
+    public async Task<List<Flight>> GetAllFlightsAsync() => await flightRepository.GetAllAsync();
     
-    public FlightService(IFlightRepository flightRepository)
-    {
-        _flightRepository = flightRepository;
-    }
-    
-    public async Task<List<Flight>> GetAllFlightsAsync()
-    {
-        return await _flightRepository.GetAllAsync();
-    }
-
     public async Task<Flight> GetFlightByIdAsync(int id) =>
-        await _flightRepository.GetByIdAsync(id) 
-        ?? throw new FlightNotFoundException(id);
+        await flightRepository.GetByIdAsync(id) ?? throw new FlightNotFoundException(id);
 
     public async Task<Flight> AddFlightAsync(Flight flight)
     {
-        await _flightRepository.AddAsync(flight);
+        await flightRepository.AddAsync(flight);
         return flight;
     }
 
     public async Task<Flight> UpdateFlightAsync(int id, UpdateFlightRequestDto dto)
     {
-        var flight = await _flightRepository.GetByIdAsync(id);
-        if (flight == null)
+        var exists = await flightRepository.ExistsByIdAsync(id);
+        if (!exists)
         {
             throw new FlightNotFoundException(id);
         }
         
         var model = FlightMapper.ToFlight(dto);
         
-        await _flightRepository.UpdateAsync(id, model);
+        await flightRepository.UpdateAsync(id, model);
         return model;
     }
 
-    public async Task DeleteFlightAsync(int id)
-    {
-        await _flightRepository.DeleteAsync(id);
-    }
+    public async Task DeleteFlightAsync(int id) => await flightRepository.DeleteAsync(id);
 }

@@ -5,36 +5,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlightBooking.Infrastructure.Repositories;
 
-public class FlightRepository : IFlightRepository
+public class FlightRepository(FlightBookingDbContext dbContext) : IFlightRepository
 {
-    private readonly FlightBookingDbContext _dbContext;
-    
-    public FlightRepository(FlightBookingDbContext context)
-    {
-        _dbContext = context;
-    }
-
     public async Task<List<Flight>> GetAllAsync()
     {
-        return await _dbContext.Flights.ToListAsync();
+        return await dbContext.Flights.ToListAsync();
     }
 
     public async Task<Flight?> GetByIdAsync(int flightId)
     {
-        return await _dbContext.Flights
+        return await dbContext.Flights
             .Include(f => f.Seats)
             .FirstOrDefaultAsync(f => f.Id == flightId);
     }
 
     public async Task AddAsync(Flight flight)
     {
-        _dbContext.Flights.Add(flight);
-        await _dbContext.SaveChangesAsync();
+        dbContext.Flights.Add(flight);
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(int id, Flight model)
     {
-        await _dbContext.Flights
+        await dbContext.Flights
             .Where(f => f.Id == id)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(f => f.From, model.From)
@@ -46,8 +39,13 @@ public class FlightRepository : IFlightRepository
 
     public async Task DeleteAsync(int flightId)
     {
-        await _dbContext.Flights
+        await dbContext.Flights
             .Where(f => f.Id == flightId)
             .ExecuteDeleteAsync();
+    }
+
+    public async Task<bool> ExistsByIdAsync(int flightId)
+    {
+        return await dbContext.Flights.AnyAsync(f => f.Id == flightId);
     }
 }

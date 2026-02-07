@@ -10,21 +10,14 @@ namespace FlightBooking.Controllers;
 [ApiController]
 [Route("api/bookings")]
 [Authorize]
-public class BookingController : ControllerBase
+public class BookingController(IBookingService bookingService) : ControllerBase
 {
-    private readonly IBookingService _bookingService;
-
-    public BookingController(IBookingService bookingService)
-    {
-        _bookingService = bookingService;
-    }
-
     [HttpPost]
     public async Task<ActionResult<BookingDto>> CreateBooking([FromBody] BookingRequestDto requestDto)
     {
         var userId = GetUserId();
 
-        var booking = await _bookingService.CreateBookingAsync(userId, requestDto);
+        var booking = await bookingService.CreateBookingAsync(userId, requestDto);
         return Ok(BookingMapper.ToBookingDto(booking));
     }
 
@@ -33,7 +26,7 @@ public class BookingController : ControllerBase
     {
         var userId = GetUserId();
 
-        var bookings = await _bookingService.GetUserBookingsAsync(userId);
+        var bookings = await bookingService.GetUserBookingsAsync(userId);
         return Ok(bookings.Select(BookingMapper.ToBookingDto));
     }
 
@@ -42,7 +35,7 @@ public class BookingController : ControllerBase
     {
         var userId = GetUserId();
         var isAdmin = User.IsInRole("Admin");
-        var booking = await _bookingService.CancelBookingAsync(bookingId, userId,  isAdmin);
+        var booking = await bookingService.CancelBookingAsync(bookingId, userId,  isAdmin);
 
         return Ok(BookingMapper.ToBookingDto(booking));
     }
@@ -51,7 +44,7 @@ public class BookingController : ControllerBase
     [HttpPut("users/{userId:int}/cancel")]
     public async Task<ActionResult<IEnumerable<BookingDto>>> CancelUserBookingsByAdmin(int userId)
     {
-        var bookings = await _bookingService.CancelUserBookingsByAdminAsync(userId);
+        var bookings = await bookingService.CancelUserBookingsByAdminAsync(userId);
         return Ok(bookings.Select(BookingMapper.ToBookingDto));
     }
 

@@ -6,6 +6,7 @@ using FlightBooking.ExceptionHandler;
 using FlightBooking.Infrastructure.Data;
 using FlightBooking.Infrastructure.Identity;
 using FlightBooking.Infrastructure.Repositories;
+using FlightBooking.Infrastructure.Services;
 using FlightBooking.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +60,7 @@ builder.Services.AddDbContext<FlightBookingDbContext>(options =>
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
+    options.User.RequireUniqueEmail = true;
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;

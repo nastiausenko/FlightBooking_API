@@ -4,5 +4,5 @@ namespace FlightBooking.Application.Interfaces;
 
 public interface ITokenService
 {
-    Task<string> CreateTokenAsync(AppUserDto user, IEnumerable<string> roles);
+    string CreateToken(AppUserDto user, IEnumerable<string> roles);
 }

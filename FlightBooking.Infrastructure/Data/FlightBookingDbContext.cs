@@ -6,12 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlightBooking.Infrastructure.Data;
 
-public class FlightBookingDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
+public class FlightBookingDbContext(DbContextOptions options) : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>(options)
 {
-    public FlightBookingDbContext(DbContextOptions options) : base(options)
-    {
-    }
-
     public DbSet<Flight> Flights { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<BookingSeat> BookingSeats { get; set; }
@@ -33,8 +29,6 @@ public class FlightBookingDbContext : IdentityDbContext<ApplicationUser, Identit
         modelBuilder.Entity<Seat>()
             .HasIndex(seat => new {seat.FlightId, seat.SeatNumber})
             .IsUnique();
-        
-        modelBuilder.Entity<ApplicationUser>().HasIndex(u => u.Email).IsUnique(); 
         
         modelBuilder.Entity<BookingSeat>()
             .HasIndex(bs => new { bs.BookingId, bs.SeatId })

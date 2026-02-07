@@ -7,17 +7,8 @@ using FlightBooking.Domain.Models;
 
 namespace FlightBooking.Application.Services;
 
-public class BookingService : IBookingService
+public class BookingService(IBookingRepository bookingRepository, ISeatRepository seatRepository) : IBookingService
 {
-    private readonly IBookingRepository _bookingRepository;
-    private readonly ISeatRepository _seatRepository;
-
-    public BookingService(IBookingRepository bookingRepository,  ISeatRepository seatRepository)
-    {
-        _bookingRepository  = bookingRepository;
-        _seatRepository = seatRepository;
-    }
-
     public async Task<Booking> CreateBookingAsync(int userId, BookingRequestDto dto)
     {
         var booking = BookingMapper.ToBooking(dto);
@@ -25,16 +16,70 @@ public class BookingService : IBookingService
         booking.BookingDate = DateTime.UtcNow;
 
         var seatIds = booking.BookingSeats.Select(s => s.SeatId).ToList();
-        var seats = await _seatRepository.GetByIdsAsync(seatIds);
+        var seats = await seatRepository.GetByIdsAsync(seatIds);
         
-        var foundSeatIds = seats.Select(s => s.Id).ToHashSet();
-        var missingSeatIds = seatIds.Where(id => !foundSeatIds.Contains(id)).ToList();
+        ValidateSeatsExistence(seatIds, seats);
 
-        if (missingSeatIds.Count > 0)
+        booking.TotalPrice = AssignSeatsToBooking(booking, seats);
+
+        await bookingRepository.AddAsync(booking);
+        return booking;
+    }
+
+    public async Task<Booking> CancelBookingAsync(int bookingId, int userId, bool isAdmin)
+    {
+        var booking = await bookingRepository.GetByIdAsync(bookingId) ?? throw new BookingNotFoundException(bookingId);
+        
+        if (!isAdmin && booking.UserId != userId)
         {
-            throw new SeatNotFoundException(missingSeatIds.ToArray());
+            throw new ForbiddenException("You are not allowed to cancel this booking");
         }
 
+        if (booking.IsCancelled)
+        {
+            throw new BookingAlreadyCanceledException(bookingId);
+        }
+        
+        CancelBooking(booking);
+
+        await bookingRepository.SaveChangesAsync();
+        return booking;
+    }
+
+    public async Task<List<Booking>> CancelUserBookingsByAdminAsync(int userId)
+    {
+        var bookings = await bookingRepository.GetActiveByUserIdAsync(userId);
+        if (bookings.Count == 0)
+        {
+           throw new NoActiveBookingsException(userId);
+        }
+        
+        foreach (var booking in bookings)
+        {
+            CancelBooking(booking);
+        }
+        
+        await bookingRepository.SaveChangesAsync();
+        return bookings;
+    }
+
+    public async Task<List<Booking>> GetUserBookingsAsync(int userId) => await bookingRepository.GetByUserIdAsync(userId);
+
+    public async Task<Booking?> GetBookingByIdAsync(int bookingId) => 
+        await bookingRepository.GetByIdAsync(bookingId) ?? throw new BookingNotFoundException(bookingId);
+    
+    private static void ValidateSeatsExistence(List<int> requestedIds, List<Seat> foundSeats)
+    {
+        var foundSeatIds = foundSeats.Select(s => s.Id).ToHashSet();
+        var missingSeatIds = requestedIds.Where(id => !foundSeatIds.Contains(id)).ToArray();
+        if (missingSeatIds.Length > 0)
+        {
+            throw new SeatNotFoundException(missingSeatIds);
+        }
+    }
+    
+    private static decimal AssignSeatsToBooking(Booking booking, List<Seat> seats)
+    {
         decimal totalPrice = 0;
 
         foreach (var seat in seats)
@@ -47,7 +92,6 @@ public class BookingService : IBookingService
             seat.Status = SeatStatus.Booked;
 
             var bookingSeat = booking.BookingSeats.First(bs => bs.SeatId == seat.Id);
-
             bookingSeat.Seat = seat;
             bookingSeat.Price = seat.Price;
             bookingSeat.IsCancelled = false;
@@ -55,69 +99,16 @@ public class BookingService : IBookingService
             totalPrice += seat.Price;
         }
 
-        booking.TotalPrice = totalPrice;
-
-        await _bookingRepository.AddAsync(booking);
-        return booking;
+        return totalPrice;
     }
 
-    public async Task<Booking> CancelBookingAsync(int bookingId, int userId, bool isAdmin)
+    private static void CancelBooking(Booking booking)
     {
-        var booking = await _bookingRepository.GetByIdAsync(bookingId);
-        if (booking == null)
-        {
-            throw new BookingNotFoundException(bookingId);
-        }
-        
-        if (!isAdmin && booking.UserId != userId)
-        {
-            throw new ForbiddenException("You are not allowed to cancel this booking");
-        }
-
-        if (booking.IsCancelled)
-        {
-            throw new BookingAlreadyCanceledException(bookingId);
-        }
-        
         booking.IsCancelled = true;
-
         foreach (var bookingSeat in booking.BookingSeats)
         {
             bookingSeat.IsCancelled = true;
             bookingSeat.Seat.Status = SeatStatus.Available;
         }
-
-        await _bookingRepository.SaveChangesAsync();
-        return booking;
     }
-
-    public async Task<List<Booking>> CancelUserBookingsByAdminAsync(int userId)
-    {
-        var bookings = await _bookingRepository.GetActiveByUserIdAsync(userId);
-        if (bookings.Count == 0)
-        {
-           throw new NoActiveBookingsException(userId);
-        }
-        
-        foreach (var booking in bookings)
-        {
-            booking.IsCancelled = true;
-            foreach (var bookingSeat in booking.BookingSeats)
-            {
-                bookingSeat.IsCancelled = true;
-                bookingSeat.Seat.Status = SeatStatus.Available;
-            }
-        }
-        await _bookingRepository.SaveChangesAsync();
-        return bookings;
-    }
-
-    public async Task<List<Booking>> GetUserBookingsAsync(int userId)
-    {
-        return await _bookingRepository.GetByUserIdAsync(userId);
-    }
-
-    public async Task<Booking?> GetBookingByIdAsync(int bookingId) => 
-        await _bookingRepository.GetByIdAsync(bookingId)
-        ?? throw new BookingNotFoundException(bookingId);
 }

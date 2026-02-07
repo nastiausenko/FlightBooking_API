@@ -5,23 +5,11 @@ using FlightBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace FlightBooking.Application.Services;
+namespace FlightBooking.Infrastructure.Services;
 
-public class AuthService : IAuthService
+public class AuthService(UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager, ITokenService tokenService) : IAuthService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly ITokenService _tokenService;
-
-    public AuthService(UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
-        ITokenService tokenService)
-    {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _tokenService = tokenService;
-    }
-
     public async Task<string> RegisterAsync(RegisterDto dto)
     {
         var user = new ApplicationUser
@@ -30,46 +18,42 @@ public class AuthService : IAuthService
             Email = dto.Email
         };
 
-        var result = await _userManager.CreateAsync(user, dto.Password);
+        var result = await userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
         {
             var errors = string.Join("; ", result.Errors.Select(e => e.Description));
             throw new UserRegistrationException(errors);
         }
         
-        await _userManager.AddToRoleAsync(user, "Passenger");
-        var roles = await _userManager.GetRolesAsync(user);
-        var userDto = new AppUserDto
-        {
-            Id = user.Id,
-            UserName = user.UserName,
-            Email = user.Email,
-        };
-        return await _tokenService.CreateTokenAsync(userDto, roles);
+        await userManager.AddToRoleAsync(user, "Passenger");
+        
+        return await GenerateToken(user);
     }
 
     public async Task<string> LoginAsync(LoginDto dto)
     {
-        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException();
-        } 
+        var user = await userManager.Users.FirstOrDefaultAsync(u => u.Email == dto.Email) 
+                   ?? throw new UnauthorizedAccessException();
 
-        var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
+        var result = await signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
         if (!result.Succeeded)
         {
             throw new UnauthorizedAccessException();
         }
-        
-        var roles = await _userManager.GetRolesAsync(user);
+
+        return await GenerateToken(user);
+    }
+    
+    private async Task<string> GenerateToken(ApplicationUser user)
+    {
+        var roles = await userManager.GetRolesAsync(user);
         var userDto = new AppUserDto
         {
             Id = user.Id,
             UserName = user.UserName,
-            Email = user.Email,
+            Email = user.Email
         };
 
-        return await _tokenService.CreateTokenAsync(userDto, roles);
+        return tokenService.CreateToken(userDto, roles);
     }
 }

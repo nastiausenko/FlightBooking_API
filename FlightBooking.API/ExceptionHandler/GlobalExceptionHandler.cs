@@ -3,23 +3,16 @@ using FlightBooking.Application.Services;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FlightBooking.ExceptionHandlers;
+namespace FlightBooking.ExceptionHandler;
 
-internal sealed class GlobalExceptionHandler : IExceptionHandler
-{
-    private readonly ILogger<GlobalExceptionHandler> _logger;
-
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
-    {
-        _logger = logger;
-    }
-
+internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+{ 
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(
+        logger.LogError(
             exception, "Exception occurred: {Message}", exception.Message);
         
         var (status, title) = exception switch
@@ -27,9 +20,12 @@ internal sealed class GlobalExceptionHandler : IExceptionHandler
             SeatNotFoundException => (404, "Seat not found"),
             BookingNotFoundException => (404, "Booking not found"),
             FlightNotFoundException => (404, "Flight not found"),
-            BookingAlreadyCanceledException => (409, "Booking already canceled"),//TODO
+            BookingAlreadyCanceledException => (409, "Booking already canceled"),
             NoActiveBookingsException => (404, "No active bookings"),
             SeatNotAvailableException => (404, "Seat not available"),
+            UserRegistrationException => (400, "User registration failed"),
+            FlightAlreadyExistsException => (409, "Flight already exists"),
+            SeatAlreadyExistsException => (409, "Seat already exists"),
             
             ForbiddenException => (403, "Forbidden"),
             UnauthorizedAccessException => (401, "Unauthorized"),

@@ -9,19 +9,12 @@ namespace FlightBooking.Controllers;
 [ApiController]
 [Route("api/flights")]
 [Authorize]
-public class FlightController : ControllerBase
+public class FlightController(IFlightService flightService) : ControllerBase
 {
-    private readonly IFlightService _flightService;
-
-    public FlightController(IFlightService flightService)
-    {
-        _flightService = flightService;
-    }
-
     [HttpGet]
     public async Task<ActionResult<IEnumerable<FlightDto>>> GetAll()
     {
-        var flights = await _flightService.GetAllFlightsAsync();
+        var flights = await flightService.GetAllFlightsAsync();
         var dto = flights.Select(FlightMapper.ToFlightDto);
         return Ok(dto);
     }
@@ -29,7 +22,7 @@ public class FlightController : ControllerBase
     [HttpGet("{flightId:int}")]
     public async Task<ActionResult<FlightDetailsDto>> GetById(int flightId)
     {
-        var flight = await _flightService.GetFlightByIdAsync(flightId);
+        var flight = await flightService.GetFlightByIdAsync(flightId);
         
         var dto = FlightMapper.ToFlightDetailsDto(flight);
         return Ok(dto);
@@ -40,7 +33,7 @@ public class FlightController : ControllerBase
     public async Task<ActionResult<FlightDto>> CreateFlight([FromBody] CreateFlightRequestDto requestDto)
     {
         var flight = FlightMapper.ToFlight(requestDto);
-        await _flightService.AddFlightAsync(flight);
+        await flightService.AddFlightAsync(flight);
 
         var dto = FlightMapper.ToFlightDetailsDto(flight);
         return CreatedAtAction(nameof(GetById), new { flightId = dto.Id }, dto);
@@ -50,7 +43,7 @@ public class FlightController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateFlight(int flightId, [FromBody] UpdateFlightRequestDto updateDto)
     {
-        var updatedFlight = await _flightService.UpdateFlightAsync(flightId, updateDto);
+        var updatedFlight = await flightService.UpdateFlightAsync(flightId, updateDto);
         
         return Ok(FlightMapper.ToFlightDto(updatedFlight));
     }
@@ -59,7 +52,7 @@ public class FlightController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteFlight(int flightId)
     {
-        await _flightService.DeleteFlightAsync(flightId);
+        await flightService.DeleteFlightAsync(flightId);
         return NoContent();
     }
 }

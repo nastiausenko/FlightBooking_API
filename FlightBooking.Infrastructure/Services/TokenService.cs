@@ -9,22 +9,20 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
-namespace FlightBooking.Application.Services;
+namespace FlightBooking.Infrastructure.Services;
 
 public class TokenService : ITokenService
 {
     private readonly IConfiguration _configuration;
     private readonly SymmetricSecurityKey _securityKey;
-    private readonly UserManager<ApplicationUser> _userManager;
 
     public TokenService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
     {
         _configuration = configuration;
         _securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        _userManager = userManager;
     }
 
-    public async Task<string> CreateTokenAsync(AppUserDto user, IEnumerable<string> roles)
+    public string CreateToken(AppUserDto user, IEnumerable<string> roles)
     {
         var claims = new List<Claim>
         {

@@ -1,19 +1,20 @@
 using FlightBooking.Application.Dtos.Booking;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Mappers;
+using FlightBooking.Domain.Interfaces;
 using FlightBooking.Domain.Models;
-using FlightBooking.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace FlightBooking.Application.Services;
 
 public class BookingService : IBookingService
 {
-    private readonly FlightBookingDbContext _dbContext;
+    private readonly IBookingRepository _bookingRepository;
+    private readonly ISeatRepository _seatRepository;
 
-    public BookingService(FlightBookingDbContext dbContext)
+    public BookingService(IBookingRepository bookingRepository,  ISeatRepository seatRepository)
     {
-        _dbContext = dbContext;
+        _bookingRepository  = bookingRepository;
+        _seatRepository = seatRepository;
     }
 
     public async Task<Booking> CreateBookingAsync(int userId, BookingRequestDto dto)
@@ -32,10 +33,17 @@ public class BookingService : IBookingService
         };
 
         var seatIds = booking.BookingSeats.Select(s => s.SeatId).ToList();
-        var seats = await _dbContext.Seats.Where(s => seatIds.Contains(s.Id)).ToListAsync();
+        var seats = await _seatRepository.GetByIdsAsync(seatIds);
+
+        if (seats == null)
+        {
+            throw new KeyNotFoundException("Seat not found");
+        }
 
         if (seats.Count != seatIds.Count)
+        {
             throw new InvalidOperationException("One or more seats not found");
+        }
 
         decimal totalPrice = 0;
 
@@ -59,19 +67,13 @@ public class BookingService : IBookingService
 
         booking.TotalPrice = totalPrice;
 
-        _dbContext.Bookings.Add(booking);
-        await _dbContext.SaveChangesAsync();
-
+        await _bookingRepository.AddAsync(booking);
         return booking;
     }
 
     public async Task<Booking> CancelBookingAsync(int bookingId)
     {
-        var booking = await _dbContext.Bookings
-            .Include(b => b.BookingSeats)
-            .ThenInclude(bs => bs.Seat)
-            .FirstOrDefaultAsync(b => b.Id == bookingId);
-        
+        var booking = await _bookingRepository.GetByIdAsync(bookingId);
         if (booking == null)
         {
             throw new KeyNotFoundException("Booking not found");
@@ -90,86 +92,38 @@ public class BookingService : IBookingService
             bookingSeat.Seat.Status = SeatStatus.Available;
         }
 
-        await _dbContext.SaveChangesAsync();
+        await _bookingRepository.SaveChangesAsync();
         return booking;
     }
 
-    public async Task<List<Booking>> CancelBookingByAdminAsync(int? bookingId, int? userId)
+    public async Task<List<Booking>> CancelUserBookingsByAdminAsync(int userId)
     {
-        if (!bookingId.HasValue && !userId.HasValue)
+        var bookings = await _bookingRepository.GetActiveByUserIdAsync(userId);
+        if (!bookings.Any())
         {
-            throw new ArgumentException("Either bookingId or userId should be provided");
+           throw new KeyNotFoundException("No active bookings found");
         }
-
-        var bookingsToCancel = new List<Booking>();
-        if (bookingId.HasValue)
+        
+        foreach (var booking in bookings)
         {
-            var booking = await _dbContext.Bookings
-                .Include(b => b.BookingSeats)
-                .ThenInclude(bs => bs.Seat)
-                .FirstOrDefaultAsync(b => b.Id == bookingId.Value);
-
-            if (booking == null)
+            booking.IsCancelled = true;
+            foreach (var bookingSeat in booking.BookingSeats)
             {
-                throw new KeyNotFoundException("Booking not found");
-            }
-
-            if (!booking.IsCancelled)
-            {
-                booking.IsCancelled = true;
-                foreach (var bookingSeat in booking.BookingSeats)
-                {
-                    bookingSeat.IsCancelled = true;
-                    bookingSeat.Seat.Status = SeatStatus.Available;
-                }
-                
-                bookingsToCancel.Add(booking);
+                bookingSeat.IsCancelled = true;
+                bookingSeat.Seat.Status = SeatStatus.Available;
             }
         }
-        else if (userId.HasValue)
-        {
-            var userExists = await _dbContext.Users.AnyAsync(b => b.Id == userId.Value);
-            if (!userExists)
-            {
-                throw new KeyNotFoundException("User not found");
-            }
-            
-            var userBookings = await _dbContext.Bookings
-                .Where(b => b.UserId == userId.Value && !b.IsCancelled)
-                .Include(b => b.BookingSeats)
-                .ThenInclude(bs => bs.Seat)
-                .ToListAsync();
-
-            foreach (var booking in userBookings)
-            {
-                booking.IsCancelled = true;
-                foreach (var bookingSeat in booking.BookingSeats)
-                {
-                    bookingSeat.IsCancelled = true;
-                    bookingSeat.Seat.Status = SeatStatus.Available;
-                }
-
-                bookingsToCancel.Add(booking);
-            }
-        }
-
-        await _dbContext.SaveChangesAsync();
-        return bookingsToCancel;
+        await _bookingRepository.SaveChangesAsync();
+        return bookings;
     }
 
     public async Task<List<Booking>> GetUserBookingsAsync(int userId)
     {
-        return await _dbContext.Bookings.Where(b => b.UserId == userId)
-            .Include(b => b.BookingSeats)
-            .ThenInclude(bs => bs.Seat)
-            .ToListAsync();
+        return await _bookingRepository.GetByUserIdAsync(userId);
     }
 
     public async Task<Booking?> GetBookingByIdAsync(int bookingId)
     {
-        return await _dbContext.Bookings
-            .Include(b => b.BookingSeats)
-            .ThenInclude(bs => bs.Seat)
-            .FirstOrDefaultAsync(b => b.Id == bookingId);
+        return await _bookingRepository.GetByIdAsync(bookingId);
     }
 }

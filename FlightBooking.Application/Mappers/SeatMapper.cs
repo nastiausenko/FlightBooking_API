@@ -22,8 +22,7 @@ public static class SeatMapper
         return new Seat
         {
             SeatNumber = requestDto.SeatNumber,
-            Price = requestDto.Price,
-            Status = SeatStatus.Available
+            Price = requestDto.Price
         };
     }
 }

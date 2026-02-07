@@ -1,8 +1,10 @@
 using System.Text;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Services;
+using FlightBooking.Domain.Interfaces;
 using FlightBooking.Infrastructure.Data;
 using FlightBooking.Infrastructure.Identity;
+using FlightBooking.Infrastructure.Repositories;
 using FlightBooking.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +46,9 @@ builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<ISeatRepository, SeatRepository>();
+builder.Services.AddScoped<IFlightRepository, FlightRepository>();
 
 builder.Services.AddDbContext<FlightBookingDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

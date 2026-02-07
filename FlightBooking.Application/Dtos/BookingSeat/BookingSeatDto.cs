@@ -4,6 +4,7 @@ public class BookingSeatDto
 {
     public int Id { get; set; }
     public int BookingId { get; set; }
+    public int FlightId { get; set; }
     public int SeatId { get; set; }
     public string SeatNumber { get; set; } = string.Empty;
     public bool IsCancelled { get; set; } 

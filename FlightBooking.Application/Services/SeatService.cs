@@ -1,26 +1,24 @@
 using FlightBooking.Application.Dtos.Seat;
 using FlightBooking.Application.Interfaces;
+using FlightBooking.Domain.Interfaces;
 using FlightBooking.Domain.Models;
-using FlightBooking.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace FlightBooking.Application.Services;
 
 public class SeatService : ISeatService
 {
-    private readonly FlightBookingDbContext _dbContext;
+    private readonly ISeatRepository _seatRepository;
+    private readonly IFlightRepository _flightRepository;
 
-    public SeatService(FlightBookingDbContext context)
+    public SeatService(ISeatRepository seatRepository, IFlightRepository flightRepository)
     {
-        _dbContext = context;
+        _seatRepository = seatRepository;
+        _flightRepository = flightRepository;
     }
     
     public async Task<Seat> AddSeatToFlightAsync(int flightId, Seat seat)
     {
-        var flight = await _dbContext.Flights
-            .Include(f => f.Seats)
-            .FirstOrDefaultAsync(f => f.Id == flightId);
-        
+        var flight = await _flightRepository.GetByIdAsync(flightId);
         if (flight == null)
         {
             throw new KeyNotFoundException("Flight not found");
@@ -28,15 +26,14 @@ public class SeatService : ISeatService
         
         seat.FlightId = flightId;
         
-        _dbContext.Seats.Add(seat);
-        await _dbContext.SaveChangesAsync();
+        await _seatRepository.AddAsync(seat);
         
         return seat;
     }
 
     public async Task<Seat?> UpdateSeatAsync(int id, SeatRequestDto requestDto)
     {
-        var seat = await _dbContext.Seats.FirstOrDefaultAsync(s => s.Id == id);
+        var seat = await _seatRepository.GetByIdAsync(id);
         if (seat == null)
         {
             return null;
@@ -45,51 +42,41 @@ public class SeatService : ISeatService
         seat.Price = requestDto.Price;
         seat.SeatNumber = requestDto.SeatNumber;
         
-        await _dbContext.SaveChangesAsync();
+        await _seatRepository.UpdateAsync(seat);
         return seat;
     }
 
     public async Task DeleteSeatAsync(int id)
     {
-        var seat = await _dbContext.Seats
-            .Include(s => s.BookingSeats)
-            .ThenInclude(bs => bs.Booking)
-            .FirstOrDefaultAsync(s => s.Id == id);
+        var seat = await _seatRepository.GetByIdAsync(id);
 
         if (seat == null)
+        {
             return;
+        }
 
         foreach (var bookingSeat in seat.BookingSeats)
         {
             var booking = bookingSeat.Booking;
             booking.TotalPrice -= bookingSeat.Price;
-
-            _dbContext.BookingSeats.Remove(bookingSeat);
         }
 
-        _dbContext.Seats.Remove(seat);
-
-        await _dbContext.SaveChangesAsync();
+        await _seatRepository.DeleteAsync(seat);
     }
 
     public async Task<Seat?> GetSeatByIdAsync(int id)
     {
-        return await _dbContext.Seats
-            .Include(s => s.Flight)
-            .FirstOrDefaultAsync(s => s.Id == id);
+        return await _seatRepository.GetByIdAsync(id);
     }
 
     public async Task<List<Seat>> GetAllByFlightIdAsync(int flightId)
     {
-        var flight = await _dbContext.Flights
-            .Include(f => f.Seats)
-            .FirstOrDefaultAsync(f => f.Id == flightId);
-        
+        var flight = await _flightRepository.GetByIdAsync(flightId);
         if (flight == null)
         {
             throw new KeyNotFoundException("Flight not found");
         }
         
-        return await _dbContext.Seats.Where(s => s.FlightId == flightId).ToListAsync();
+        return await _seatRepository.GetByFlightIdAsync(flightId);
     }
 }

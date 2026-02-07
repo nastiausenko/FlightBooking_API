@@ -50,4 +50,18 @@ public static class FlightMapper
 
         return flight;
     }
+
+    public static Flight ToFlight(UpdateFlightRequestDto requestDto)
+    {
+        var flight = new Flight
+        {
+            From = requestDto.From,
+            To = requestDto.To,
+            FlightNumber = requestDto.FlightNumber,
+            Departure = requestDto.Departure,
+            Arrival = requestDto.Arrival
+        };
+        
+        return flight;
+    }
 }

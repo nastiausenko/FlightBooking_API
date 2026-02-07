@@ -11,6 +11,7 @@ public static class BookingSeatMapper
         {
             Id = bookingSeat.Id,
             SeatId = bookingSeat.SeatId,
+            FlightId = bookingSeat.Seat.FlightId,
             BookingId = bookingSeat.BookingId,
             SeatNumber = bookingSeat.Seat.SeatNumber,
             IsCancelled = bookingSeat.IsCancelled,

@@ -1,3 +1,3 @@
-namespace FlightBooking.Application.Exceptions;
+namespace FlightBooking.Application.Exceptions.Auth;
 
 public class UserRegistrationException(string message) : Exception(message);

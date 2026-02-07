@@ -1,5 +1,7 @@
 using FlightBooking.Application.Dtos.Booking;
-using FlightBooking.Application.Exceptions;
+using FlightBooking.Application.Exceptions.Auth;
+using FlightBooking.Application.Exceptions.Booking;
+using FlightBooking.Application.Exceptions.Seat;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Mappers;
 using FlightBooking.Domain.Interfaces;

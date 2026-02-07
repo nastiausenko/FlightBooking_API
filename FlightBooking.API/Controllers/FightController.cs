@@ -1,6 +1,7 @@
 using FlightBooking.Application.Dtos.Flight;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Mappers;
+using FlightBooking.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,18 +13,27 @@ namespace FlightBooking.Controllers;
 public class FlightController(IFlightService flightService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<FlightDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<FlightDto>>> GetAll([FromQuery] FlightQueryDto? queryDto)
     {
-        var flights = await flightService.GetAllFlightsAsync();
-        var dto = flights.Select(FlightMapper.ToFlightDto);
-        return Ok(dto);
+        IEnumerable<Flight> flights;
+        
+        if (queryDto == null)
+        {
+            flights = await flightService.GetAllFlightsAsync();
+        }
+        else
+        {
+            flights = await flightService.GetFlightsAsync(queryDto);
+        }
+        
+        return Ok(flights.Select(FlightMapper.ToFlightDto));
     }
 
     [HttpGet("{flightId:int}")]
     public async Task<ActionResult<FlightDetailsDto>> GetById(int flightId)
     {
         var flight = await flightService.GetFlightByIdAsync(flightId);
-        
+
         var dto = FlightMapper.ToFlightDetailsDto(flight);
         return Ok(dto);
     }
@@ -44,7 +54,7 @@ public class FlightController(IFlightService flightService) : ControllerBase
     public async Task<IActionResult> UpdateFlight(int flightId, [FromBody] UpdateFlightRequestDto updateDto)
     {
         var updatedFlight = await flightService.UpdateFlightAsync(flightId, updateDto);
-        
+
         return Ok(FlightMapper.ToFlightDto(updatedFlight));
     }
 

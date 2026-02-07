@@ -47,4 +47,25 @@ public class FlightService(IFlightRepository flightRepository) : IFlightService
     }
 
     public async Task DeleteFlightAsync(int id) => await flightRepository.DeleteAsync(id);
+    
+    public async Task<List<Flight>> GetFlightsAsync(FlightQueryDto queryDto)
+    {
+        var flights = await flightRepository.GetAllAsync();
+
+        if (!string.IsNullOrWhiteSpace(queryDto.From))
+        {
+            flights = flights
+                .Where(f => f.From.Contains(queryDto.From, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        
+        if (!string.IsNullOrWhiteSpace(queryDto.To))
+        {
+            flights = flights
+                .Where(f => f.To.Contains(queryDto.To, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        
+        return flights;
+    }
 }

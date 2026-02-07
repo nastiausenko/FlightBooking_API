@@ -23,4 +23,12 @@
         <ProjectReference Include="..\FlightBooking.Infrastructure\FlightBooking.Infrastructure.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ExceptionHandlers\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="ExceptionHandlers\GlobalExceptionHandler.cs" />
+    </ItemGroup>
+
 </Project>

@@ -2,7 +2,7 @@ using System.Text;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Application.Services;
 using FlightBooking.Domain.Interfaces;
-using FlightBooking.ExceptionHandlers;
+using FlightBooking.ExceptionHandler;
 using FlightBooking.Infrastructure.Data;
 using FlightBooking.Infrastructure.Identity;
 using FlightBooking.Infrastructure.Repositories;

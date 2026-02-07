@@ -33,5 +33,11 @@ public class FlightBookingDbContext : IdentityDbContext<ApplicationUser, Identit
         modelBuilder.Entity<Seat>()
             .HasIndex(seat => new {seat.FlightId, seat.SeatNumber})
             .IsUnique();
+        
+        modelBuilder.Entity<ApplicationUser>().HasIndex(u => u.Email).IsUnique(); 
+        
+        modelBuilder.Entity<BookingSeat>()
+            .HasIndex(bs => new { bs.BookingId, bs.SeatId })
+            .IsUnique();
     }
 }

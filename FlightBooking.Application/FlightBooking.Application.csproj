@@ -9,11 +9,14 @@
 
     <ItemGroup>
         <ProjectReference Include="..\FlightBooking.Domain\FlightBooking.Domain.csproj"/>
-        <ProjectReference Include="..\FlightBooking.Infrastructure\FlightBooking.Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Services\AuthService.cs" />
     </ItemGroup>
 
 </Project>

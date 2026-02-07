@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using FlightBooking.Application.Dtos.Auth;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -23,10 +24,8 @@ public class TokenService : ITokenService
         _userManager = userManager;
     }
 
-    public async Task<string> CreateTokenAsync(ApplicationUser user)
+    public async Task<string> CreateTokenAsync(AppUserDto user, IEnumerable<string> roles)
     {
-        var roles = await _userManager.GetRolesAsync(user);
-
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Email, user.Email),

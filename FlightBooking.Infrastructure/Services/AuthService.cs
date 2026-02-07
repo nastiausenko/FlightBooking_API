@@ -1,4 +1,5 @@
 using FlightBooking.Application.Dtos.Auth;
+using FlightBooking.Application.Exceptions;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -32,11 +33,19 @@ public class AuthService : IAuthService
         var result = await _userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
         {
-            throw new ApplicationException("An error occured while registering the user."); //TODO
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            throw new UserRegistrationException(errors);
         }
         
         await _userManager.AddToRoleAsync(user, "Passenger");
-        return await _tokenService.CreateTokenAsync(user);
+        var roles = await _userManager.GetRolesAsync(user);
+        var userDto = new AppUserDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+        };
+        return await _tokenService.CreateTokenAsync(userDto, roles);
     }
 
     public async Task<string> LoginAsync(LoginDto dto)
@@ -52,7 +61,15 @@ public class AuthService : IAuthService
         {
             throw new UnauthorizedAccessException();
         }
+        
+        var roles = await _userManager.GetRolesAsync(user);
+        var userDto = new AppUserDto
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+        };
 
-        return await _tokenService.CreateTokenAsync(user);
+        return await _tokenService.CreateTokenAsync(userDto, roles);
     }
 }

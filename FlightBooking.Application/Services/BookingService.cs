@@ -68,15 +68,15 @@ public class BookingService : IBookingService
         {
             throw new BookingNotFoundException(bookingId);
         }
+        
+        if (!isAdmin && booking.UserId != userId)
+        {
+            throw new ForbiddenException("You are not allowed to cancel this booking");
+        }
 
         if (booking.IsCancelled)
         {
             throw new BookingAlreadyCanceledException(bookingId);
-        }
-
-        if (!isAdmin && booking.UserId != userId)
-        {
-            throw new ForbiddenException("You are not allowed to cancel this booking");
         }
         
         booking.IsCancelled = true;

@@ -53,7 +53,7 @@ public class SeatService : ISeatService
 
         if (seat == null)
         {
-            throw new SeatNotFoundException(id);
+            return;
         }
 
         foreach (var bookingSeat in seat.BookingSeats)

@@ -1,8 +1,8 @@
-using FlightBooking.Infrastructure.Identity;
+using FlightBooking.Application.Dtos.Auth;
 
 namespace FlightBooking.Application.Interfaces;
 
 public interface ITokenService
 {
-    Task<string> CreateTokenAsync(ApplicationUser user);
+    Task<string> CreateTokenAsync(AppUserDto user, IEnumerable<string> roles);
 }

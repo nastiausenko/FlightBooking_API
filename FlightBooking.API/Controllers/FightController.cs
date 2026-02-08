@@ -12,6 +12,11 @@ namespace FlightBooking.Controllers;
 [Authorize]
 public class FlightController(IFlightService flightService) : ControllerBase
 {
+    /// <summary>
+    /// Gets all flights or filtered flights based on query parameters.
+    /// </summary>
+    /// <param name="queryDto">Optional filter criteria (From/To).</param>
+    /// <returns>List of flights as FlightDto.</returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<FlightDto>>> GetAll([FromQuery] FlightQueryDto? queryDto)
     {
@@ -29,6 +34,11 @@ public class FlightController(IFlightService flightService) : ControllerBase
         return Ok(flights.Select(FlightMapper.ToFlightDto));
     }
 
+    /// <summary>
+    /// Gets flight details by its ID.
+    /// </summary>
+    /// <param name="flightId">ID of the flight.</param>
+    /// <returns>Flight details as FlightDetailsDto.</returns>
     [HttpGet("{flightId:int}")]
     public async Task<ActionResult<FlightDetailsDto>> GetById(int flightId)
     {
@@ -38,6 +48,11 @@ public class FlightController(IFlightService flightService) : ControllerBase
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Creates a new flight (admin only).
+    /// </summary>
+    /// <param name="requestDto">Data for creating a flight.</param>
+    /// <returns>The created flight as FlightDetailsDto.</returns>
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<FlightDto>> CreateFlight([FromBody] CreateFlightRequestDto requestDto)
@@ -49,6 +64,12 @@ public class FlightController(IFlightService flightService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { flightId = dto.Id }, dto);
     }
 
+    /// <summary>
+    /// Updates an existing flight (admin only).
+    /// </summary>
+    /// <param name="flightId">ID of the flight to update.</param>
+    /// <param name="updateDto">Updated flight data.</param>
+    /// <returns>The updated flight as FlightDto.</returns>
     [HttpPut("{flightId:int}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateFlight(int flightId, [FromBody] UpdateFlightRequestDto updateDto)
@@ -58,6 +79,11 @@ public class FlightController(IFlightService flightService) : ControllerBase
         return Ok(FlightMapper.ToFlightDto(updatedFlight));
     }
 
+    /// <summary>
+    /// Deletes a flight (admin only).
+    /// </summary>
+    /// <param name="flightId">ID of the flight to delete.</param>
+    /// <returns>No content.</returns>
     [HttpDelete("{flightId:int}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteFlight(int flightId)

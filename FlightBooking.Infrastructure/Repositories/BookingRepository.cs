@@ -24,6 +24,7 @@ public class BookingRepository(FlightBookingDbContext dbContext) : IBookingRepos
             .ToListAsync();
     }
 
+    // Returns all user bookings that are not canceled
     public async Task<List<Booking>> GetActiveByUserIdAsync(int userId)
     {
         return await dbContext.Bookings

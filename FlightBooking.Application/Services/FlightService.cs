@@ -7,13 +7,34 @@ using FlightBooking.Domain.Models;
 
 namespace FlightBooking.Application.Services;
 
+/// <summary>
+/// Service responsible for flight management logic
+/// </summary>
+/// <param name="flightRepository"></param>
 public class FlightService(IFlightRepository flightRepository) : IFlightService
 {
+    /// <summary>
+    /// Returns all available flights.
+    /// </summary>
+    /// <returns>List of flights.</returns>
     public async Task<List<Flight>> GetAllFlightsAsync() => await flightRepository.GetAllAsync();
     
+    /// <summary>
+    /// Returns a flight by its ID.
+    /// </summary>
+    /// <param name="id">Flight ID.</param>
+    /// <exception cref="FlightNotFoundException">Thrown when a flight does not exist.</exception>
     public async Task<Flight> GetFlightByIdAsync(int id) =>
         await flightRepository.GetByIdAsync(id) ?? throw new FlightNotFoundException(id);
 
+    /// <summary>
+    /// Creates a new flight.
+    /// </summary>
+    /// <param name="flight">Flight entity to create.</param>
+    /// <returns>Created flight.</returns>
+    /// <exception cref="FlightAlreadyExistsException">
+    /// Thrown when a flight with the same flight number already exists.
+    /// </exception>
     public async Task<Flight> AddFlightAsync(Flight flight)
     {
         var exists = await flightRepository.ExistsByNumberAsync(flight.FlightNumber);
@@ -25,6 +46,14 @@ public class FlightService(IFlightRepository flightRepository) : IFlightService
         return flight;
     }
 
+    /// <summary>
+    /// Updates an existing flight by its ID.
+    /// </summary>
+    /// <param name="id">Flight ID.</param>
+    /// <param name="dto">Updated flight data.</param>
+    /// <returns>Updated flight.</returns>
+    /// <exception cref="FlightNotFoundException">Thrown when the flight does not exist.</exception>
+    /// <exception cref="FlightAlreadyExistsException">Thrown when a flight with the same number already exists.</exception>
     public async Task<Flight> UpdateFlightAsync(int id, UpdateFlightRequestDto dto)
     {
         var existsById = await flightRepository.ExistsByIdAsync(id);
@@ -50,8 +79,16 @@ public class FlightService(IFlightRepository flightRepository) : IFlightService
         return model;
     }
 
+    /// <summary>
+    /// Deletes a flight by its ID.
+    /// </summary>
+    /// <param name="id">Flight ID.</param>
     public async Task DeleteFlightAsync(int id) => await flightRepository.DeleteAsync(id);
     
+    /// <summary>
+    /// Returns flights filtered by origin and destination.
+    /// </summary>
+    /// <param name="queryDto">Flight search filters.</param>
     public async Task<List<Flight>> GetFlightsAsync(FlightQueryDto queryDto)
     {
         var flights = await flightRepository.GetAllAsync();

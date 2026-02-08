@@ -4,8 +4,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FlightBooking.Infrastructure.Identity;
 
+/// <summary>
+/// Seeds initial identity data for the application.
+/// Currently, ensures that an admin user exists with the configured credentials.
+/// </summary>
 public static class IdentitySeeder
 {
+    /// <summary>
+    /// Creates the admin user and assigns the "Admin" role if it does not exist.
+    /// </summary>
     public static async Task SeedAdminAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();

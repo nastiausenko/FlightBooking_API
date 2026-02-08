@@ -11,6 +11,12 @@ namespace FlightBooking.Controllers;
 [Authorize(Roles = "Admin")]
 public class SeatController(ISeatService seatService) : ControllerBase
 {
+    /// <summary>
+    /// Adds a new seat to a flight.
+    /// </summary>
+    /// <param name="flightId">ID of the flight to add the seat to.</param>
+    /// <param name="requestDto">Seat data.</param>
+    /// <returns>The created seat as SeatDto.</returns>
     [HttpPost("flights/{flightId:int}/seats")]
     public async Task<IActionResult> AddSeat(int flightId, [FromBody] SeatRequestDto requestDto)
     {
@@ -21,6 +27,12 @@ public class SeatController(ISeatService seatService) : ControllerBase
         return CreatedAtAction(nameof(GetSeatById), new { seatId = dto.Id }, dto);
     }
 
+    /// <summary>
+    /// Updates an existing seat.
+    /// </summary>
+    /// <param name="seatId">ID of the seat to update.</param>
+    /// <param name="seatDto">Updated seat data.</param>
+    /// <returns>The updated seat as SeatDto.</returns>
     [HttpPut("seats/{seatId:int}")]
     public async Task<IActionResult> UpdateSeat(int seatId, [FromBody] SeatRequestDto seatDto)
     {
@@ -28,6 +40,11 @@ public class SeatController(ISeatService seatService) : ControllerBase
         return Ok(SeatMapper.ToSeatDto(seat));
     }
 
+    /// <summary>
+    /// Retrieves a seat by its ID.
+    /// </summary>
+    /// <param name="seatId">ID of the seat.</param>
+    /// <returns>The seat as SeatDto.</returns>
     [HttpGet("seats/{seatId:int}")]
     public async Task<IActionResult> GetSeatById(int seatId)
     {
@@ -36,6 +53,11 @@ public class SeatController(ISeatService seatService) : ControllerBase
         return Ok(SeatMapper.ToSeatDto(result));
     }
 
+    /// <summary>
+    /// Retrieves all seats for a specified flight.
+    /// </summary>
+    /// <param name="flightId">ID of the flight.</param>
+    /// <returns>List of seats as SeatDto.</returns>
     [HttpGet("flights/{flightId:int}/seats")]
     public async Task<ActionResult<IEnumerable<SeatDto>>> GetSeatByFlightId(int flightId)
     {
@@ -44,6 +66,11 @@ public class SeatController(ISeatService seatService) : ControllerBase
         return Ok(dto);
     }
 
+    /// <summary>
+    /// Deletes a seat by its ID.
+    /// </summary>
+    /// <param name="seatId">ID of the seat to delete.</param>
+    /// <returns>No content.</returns>
     [HttpDelete("seats/{seatId:int}")]
     public async Task<IActionResult> DeleteSeat(int seatId)
     {

@@ -3,8 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using FlightBooking.Application.Dtos.Auth;
 using FlightBooking.Application.Interfaces;
-using FlightBooking.Infrastructure.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
@@ -16,7 +14,7 @@ public class TokenService : ITokenService
     private readonly IConfiguration _configuration;
     private readonly SymmetricSecurityKey _securityKey;
 
-    public TokenService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
+    public TokenService(IConfiguration configuration)
     {
         _configuration = configuration;
         _securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

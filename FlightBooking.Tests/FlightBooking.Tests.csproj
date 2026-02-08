@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\FlightBooking.API\FlightBooking.API.csproj" />
       <ProjectReference Include="..\FlightBooking.Application\FlightBooking.Application.csproj" />
       <ProjectReference Include="..\FlightBooking.Domain\FlightBooking.Domain.csproj" />
     </ItemGroup>

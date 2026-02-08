@@ -43,9 +43,9 @@ public class FlightController(IFlightService flightService) : ControllerBase
     public async Task<ActionResult<FlightDto>> CreateFlight([FromBody] CreateFlightRequestDto requestDto)
     {
         var flight = FlightMapper.ToFlight(requestDto);
-        await flightService.AddFlightAsync(flight);
-
-        var dto = FlightMapper.ToFlightDetailsDto(flight);
+        var createdFlight = await flightService.AddFlightAsync(flight);
+        var dto = FlightMapper.ToFlightDetailsDto(createdFlight);
+        
         return CreatedAtAction(nameof(GetById), new { flightId = dto.Id }, dto);
     }
 

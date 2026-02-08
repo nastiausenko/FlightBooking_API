@@ -33,10 +33,11 @@ public class SeatService(ISeatRepository seatRepository, IFlightRepository fligh
     {
         var seat = await seatRepository.GetByIdAsync(id) ?? throw new SeatNotFoundException(id);
         
-        var exists = await seatRepository.ExistsByFlightIdAndNumberAsync(seat.FlightId, requestDto.SeatNumber);
-        if (exists)
+        var allSeats = await seatRepository.GetByFlightIdAsync(seat.FlightId);
+
+        if (allSeats.Any(s => s.SeatNumber == requestDto.SeatNumber && s.Id != id))
         {
-            throw new SeatAlreadyExistsException(requestDto.SeatNumber, id);
+            throw new SeatAlreadyExistsException(requestDto.SeatNumber, seat.FlightId);
         }
       
         seat.Price = requestDto.Price;

@@ -36,7 +36,11 @@ public class FlightService(IFlightRepository flightRepository) : IFlightService
         var exists = await flightRepository.ExistsByNumberAsync(dto.FlightNumber);
         if (exists)
         {
-            throw new FlightAlreadyExistsException(dto.FlightNumber);
+            var allFlights = await flightRepository.GetAllAsync();
+            if (allFlights.Any(f => f.FlightNumber == dto.FlightNumber && f.Id != id))
+            {
+                throw new FlightAlreadyExistsException(dto.FlightNumber);
+            }
         }
         
         var model = FlightMapper.ToFlight(dto);

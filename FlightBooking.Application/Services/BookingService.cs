@@ -66,9 +66,6 @@ public class BookingService(IBookingRepository bookingRepository, ISeatRepositor
     }
 
     public async Task<List<Booking>> GetUserBookingsAsync(int userId) => await bookingRepository.GetByUserIdAsync(userId);
-
-    public async Task<Booking?> GetBookingByIdAsync(int bookingId) => 
-        await bookingRepository.GetByIdAsync(bookingId) ?? throw new BookingNotFoundException(bookingId);
     
     private static void ValidateSeatsExistence(List<int> requestedIds, List<Seat> foundSeats)
     {

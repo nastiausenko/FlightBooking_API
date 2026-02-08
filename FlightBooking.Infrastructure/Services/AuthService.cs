@@ -1,5 +1,4 @@
 using FlightBooking.Application.Dtos.Auth;
-using FlightBooking.Application.Exceptions;
 using FlightBooking.Application.Exceptions.Auth;
 using FlightBooking.Application.Interfaces;
 using FlightBooking.Infrastructure.Identity;

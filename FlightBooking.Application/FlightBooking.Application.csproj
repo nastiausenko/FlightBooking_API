@@ -11,12 +11,4 @@
         <ProjectReference Include="..\FlightBooking.Domain\FlightBooking.Domain.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Services\AuthService.cs" />
-    </ItemGroup>
-
 </Project>

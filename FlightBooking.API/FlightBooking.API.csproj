@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.23"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,10 +22,6 @@
         <ProjectReference Include="..\FlightBooking.Application\FlightBooking.Application.csproj"/>
         <ProjectReference Include="..\FlightBooking.Domain\FlightBooking.Domain.csproj"/>
         <ProjectReference Include="..\FlightBooking.Infrastructure\FlightBooking.Infrastructure.csproj"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="ExceptionHandlers\GlobalExceptionHandler.cs" />
     </ItemGroup>
 
 </Project>
